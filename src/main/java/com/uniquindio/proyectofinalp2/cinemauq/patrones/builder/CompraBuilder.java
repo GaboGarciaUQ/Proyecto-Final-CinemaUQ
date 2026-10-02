@@ -1,104 +1,84 @@
 package com.uniquindio.proyectofinalp2.cinemauq.patrones.builder;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Producto;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
-import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EstadoCompra;
 
+
+/*PATRÓN CREACIONAL: BUILDER
+Construye una Compra paso a paso. Las partes obligatorias (cliente y al
+menos una entrada) se validan en build(); las opcionales (productos,
+combos) tienen valores por defecto.
+Lo que NO se configura desde fuera (lo decide Compra):
+ - total: se calcula a partir de entradas, productos y combos.
+ - estado: toda compra nace en PENDIENTE y cambia con sus propios métodos.
+*/
 public class CompraBuilder {
 
     private String id;
     private LocalDateTime fecha;
-    private double total;
-    private EstadoCompra estado;
     private Cliente cliente;
-    private List<Entrada> entradas;
-    private List<Producto> productos;
-    private List<Combo> combos;
-    private Pago pago;
+    private final List<Entrada> entradas = new ArrayList<>();
+    private final List<Producto> productos = new ArrayList<>();
+    private final List<Combo> combos = new ArrayList<>();
 
-    public CompraBuilder conNumMatricula(String i){
-        this.id = i;
+    public CompraBuilder conId(String id) {
+        this.id = id;
         return this;
     }
 
-    public CompraBuilder conFecha(LocalDateTime f){
-        this.fecha = f;
+    public CompraBuilder conFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
         return this;
     }
 
-    public CompraBuilder conTotal(double t){
-        this.total = t;
+    public CompraBuilder conCliente(Cliente cliente) {
+        this.cliente = cliente;
         return this;
     }
 
-    public CompraBuilder conEstadoCompra(EstadoCompra e){
-        this.estado = e;
+    public CompraBuilder agregarEntrada(Entrada entrada) {
+        this.entradas.add(Objects.requireNonNull(entrada, "La entrada no puede ser nula"));
         return this;
     }
 
-    public CompraBuilder conCliente(Cliente c){
-        this.cliente = c;
+    public CompraBuilder agregarProducto(Producto producto) {
+        this.productos.add(Objects.requireNonNull(producto, "El producto no puede ser nulo"));
         return this;
     }
 
-    public CompraBuilder conListEntradas(List<Entrada> ents){
-        this.entradas = ents;
+    public CompraBuilder agregarCombo(Combo combo) {
+        this.combos.add(Objects.requireNonNull(combo, "El combo no puede ser nulo"));
         return this;
     }
 
-    public CompraBuilder conListProductos(List<Producto> prods){
-        this.productos = prods;
-        return this;
-    }
+    /**
+     * Valida las partes obligatorias y crea la compra.
+     *
+     * @throws IllegalStateException si falta el cliente o no hay entradas
+     */
+    public Compra build() {
+        if (cliente == null) {
+            throw new IllegalStateException("La compra necesita un cliente");
+        }
+        if (entradas.isEmpty()) {
+            throw new IllegalStateException("La compra necesita al menos una entrada");
+        }
 
-    public CompraBuilder conListCombos(List<Combo> combs){
-        this.combos = combs;
-        return this;
-    }
+        String idFinal = (id != null) ? id : UUID.randomUUID().toString();
+        LocalDateTime fechaFinal = (fecha != null) ? fecha : LocalDateTime.now();
 
-    public Compra build(){
-        return new Compra(this);
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
-
-    public double getTotal() {
-        return total;
-    }
-
-    public EstadoCompra getEstado() {
-        return estado;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public List<Entrada> getEntradas() {
-        return entradas;
-    }
-
-    public List<Producto> getProductos() {
-        return productos;
-    }
-
-    public List<Combo> getCombos() {
-        return combos;
-    }
-
-    public Pago getPago() {
-        return pago;
+        // List.copyOf: la compra recibe copias inmutables, así reutilizar
+        // el builder no altera compras ya construidas.
+        return new Compra(idFinal, fechaFinal, cliente,
+                List.copyOf(entradas), List.copyOf(productos), List.copyOf(combos));
     }
 }
