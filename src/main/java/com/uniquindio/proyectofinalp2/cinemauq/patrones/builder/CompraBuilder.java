@@ -2,6 +2,11 @@ package com.uniquindio.proyectofinalp2.cinemauq.patrones.builder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Producto;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EstadoCompra;
 
 public class CompraBuilder {
@@ -11,7 +16,7 @@ public class CompraBuilder {
     private double total;
     private EstadoCompra estado;
     private Cliente cliente;
-    private List<Entradas> entradas;
+    private List<Entrada> entradas;
     private List<Producto> productos;
     private List<Combo> combos;
     private Pago pago;
@@ -41,22 +46,58 @@ public class CompraBuilder {
         return this;
     }
 
-    public CompraBuilder conListEntradas(List<Entradas> ents){
+    public CompraBuilder conListEntradas(List<Entrada> ents){
         this.entradas = ents;
         return this;
     }
 
-    public CompraBuilder conListProductos(List<Productos> prods){
+    public CompraBuilder conListProductos(List<Producto> prods){
         this.productos = prods;
         return this;
     }
 
-    public CompraBuilder conListCombos(List<Combos> combs){
+    public CompraBuilder conListCombos(List<Combo> combs){
         this.combos = combs;
         return this;
     }
 
     public Compra build(){
         return new Compra(this);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public EstadoCompra getEstado() {
+        return estado;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public List<Entrada> getEntradas() {
+        return entradas;
+    }
+
+    public List<Producto> getProductos() {
+        return productos;
+    }
+
+    public List<Combo> getCombos() {
+        return combos;
+    }
+
+    public Pago getPago() {
+        return pago;
     }
 }
