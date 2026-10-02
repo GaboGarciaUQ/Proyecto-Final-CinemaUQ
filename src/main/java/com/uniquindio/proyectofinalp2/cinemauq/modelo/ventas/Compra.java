@@ -6,6 +6,7 @@ import java.util.List;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Producto;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.builder.CompraBuilder;
 
 public class Compra {
@@ -20,7 +21,7 @@ public class Compra {
     private final List<Combo> combos;
     private final Pago pago;
 
-    Compra(CompraBuilder b){
+    public Compra(CompraBuilder b){
 
         this.id = b.getId();
         this.fecha = b.getFecha();

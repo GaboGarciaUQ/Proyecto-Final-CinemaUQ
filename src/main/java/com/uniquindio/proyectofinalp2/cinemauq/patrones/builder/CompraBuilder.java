@@ -7,6 +7,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Producto;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EstadoCompra;
 
 public class CompraBuilder {
