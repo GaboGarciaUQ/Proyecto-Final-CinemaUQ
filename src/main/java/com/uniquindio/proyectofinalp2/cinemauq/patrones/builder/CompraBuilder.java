@@ -12,15 +12,17 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 
-
-/*PATRÓN CREACIONAL: BUILDER
-Construye una Compra paso a paso. Las partes obligatorias (cliente y al
-menos una entrada) se validan en build(); las opcionales (productos,
-combos) tienen valores por defecto.
-Lo que NO se configura desde fuera (lo decide Compra):
- - total: se calcula a partir de entradas, productos y combos.
- - estado: toda compra nace en PENDIENTE y cambia con sus propios métodos.
-*/
+/**
+ * PATRÓN CREACIONAL: BUILDER
+ *
+ * Construye una Compra paso a paso. Las partes obligatorias (cliente y al
+ * menos una entrada) se validan en build(); las opcionales (productos,
+ * combos) tienen valores por defecto.
+ *
+ * Lo que NO se configura desde fuera (lo decide Compra):
+ *  - total: se calcula a partir de entradas, productos y combos.
+ *  - estado: toda compra nace en PENDIENTE y cambia con sus propios métodos.
+ */
 public class CompraBuilder {
 
     private String id;
