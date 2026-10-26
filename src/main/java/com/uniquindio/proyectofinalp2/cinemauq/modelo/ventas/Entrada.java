@@ -3,6 +3,7 @@ package com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.EstadoInvalidoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 
@@ -40,7 +41,7 @@ public abstract class Entrada {
     /** Anula la entrada (por ejemplo, al cancelar la compra). */
     public void anular() {
         if (estado != EstadoEntrada.VIGENTE) {
-            throw new IllegalStateException("Solo una entrada vigente puede anularse (estado: " + estado + ")");
+            throw new EstadoInvalidoException("Solo una entrada vigente puede anularse (estado: " + estado + ")");
         }
         estado = EstadoEntrada.ANULADA;
     }

@@ -1,0 +1,9 @@
+Ventas por periodo
+Generado: 15/10/2026 12:03
+Periodo: 01/10/2026 - 14/10/2026
+Registros: 2
+------------------------------
+Interestelar - 3 entradas - $45000
+Avatar - 2 entradas - $30000
+------------------------------
+Total: 75000.0

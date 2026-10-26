@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.LoginController">
+    <left>
+        <VBox styleClass="panel-marca" prefWidth="520" alignment="CENTER_LEFT" spacing="16">
+            <Label text="CinemaUQ" styleClass="marca-nombre"/>
+            <Label text="Elige tu función, tus asientos y tu confitería en un solo lugar."
+                   styleClass="marca-lema" wrapText="true"/>
+        </VBox>
+    </left>
+    <center>
+        <StackPane>
+            <VBox maxWidth="380" spacing="16" alignment="CENTER_LEFT">
+                <Label fx:id="lblTitulo" text="Ingresar" styleClass="titulo"/>
+                <Label fx:id="lblSubtitulo" text="Usa el correo con el que te registraste."
+                       styleClass="subtitulo" wrapText="true"/>
+
+                <VBox fx:id="boxNombre" spacing="6" visible="false" managed="false">
+                    <Label text="Nombre completo" styleClass="etiqueta-campo"/>
+                    <TextField fx:id="txtNombre" promptText="Ana Gómez" onAction="#accion"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="Correo" styleClass="etiqueta-campo"/>
+                    <TextField fx:id="txtCorreo" promptText="ana@correo.com (correo con saldo)" onAction="#accion"/>
+                </VBox>
+
+                <Label fx:id="lblMensaje" styleClass="error-texto" wrapText="true"/>
+
+                <Button fx:id="btnAccion" text="Ingresar" styleClass="boton-primario"
+                        maxWidth="Infinity" onAction="#accion"/>
+
+                <HBox alignment="CENTER" spacing="4">
+                    <Label fx:id="lblCambio" text="¿Aún no tienes cuenta?" styleClass="texto-suave"/>
+                    <Button fx:id="btnCambiar" text="Crear cuenta" styleClass="boton-texto"
+                            onAction="#cambiarModo"/>
+                </HBox>
+
+                <Label text="Para probar: ana@correo.com (con saldo) o luis@correo.com (poco saldo)."
+                       styleClass="texto-suave, texto-pequeno" wrapText="true"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>
