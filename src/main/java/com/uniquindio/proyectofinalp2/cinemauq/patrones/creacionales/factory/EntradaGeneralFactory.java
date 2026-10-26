@@ -5,10 +5,10 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EntradaGeneral;
 
-public class EntradaGeneralFactory implements EntradaFactory {
+public class EntradaGeneralFactory extends EntradaFactory {
 
     @Override
-    public Entrada crearEntrada(Funcion funcion, Asiento asiento) {
+    protected Entrada crearEntrada(Funcion funcion, Asiento asiento) {
         return new EntradaGeneral(funcion, asiento);
     }
 }

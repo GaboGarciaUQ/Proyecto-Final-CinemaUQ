@@ -4,17 +4,23 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 
-/*=====FACTORY METHOD=====*/
-
+/*
+ PATRÓN CREACIONAL: FACTORY METHOD (Creator abstracto).
+ emitirEntrada define el flujo; crearEntrada es el método fábrica.
+*/
 public abstract class EntradaFactory {
 
-    public final Entrada emitirEntrada(Funcion funcion, Asiento asiento){
-        if(funcion==null||asiento==null){
-            throw new IllegalStateException("La función y el asiento son obligatorios");
+    public final Entrada emitirEntrada(Funcion funcion, Asiento asiento) {
+        if (funcion == null || asiento == null) {
+            throw new IllegalArgumentException("La función y el asiento son obligatorios");
         }
         if (!funcion.estaDisponible(asiento)) {
-            throw new IllegalStateException("El asiento no esta disponible")
+            throw new IllegalStateException("Asiento no disponible: " + asiento);
         }
+        Entrada entrada = crearEntrada(funcion, asiento);
+        funcion.ocupar(asiento);
         return entrada;
     }
+
+    protected abstract Entrada crearEntrada(Funcion funcion, Asiento asiento);
 }

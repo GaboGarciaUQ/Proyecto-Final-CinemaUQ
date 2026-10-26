@@ -5,16 +5,10 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EntradaAccesible;
 
-public class EntradaAccesibleFactory implements EntradaFactory {
+public class EntradaAccesibleFactory extends EntradaFactory {
 
     @Override
-    public Entrada crearEntrada(Funcion funcion, Asiento asiento) {
-        if (asiento == null || !asiento.esAccesible()) {
-            throw new IllegalArgumentException(
-                    "El asiento debe ser de tipo ACCESIBLE."
-            );
-        }
-
+    protected Entrada crearEntrada(Funcion funcion, Asiento asiento) {
         return new EntradaAccesible(funcion, asiento);
     }
 }
