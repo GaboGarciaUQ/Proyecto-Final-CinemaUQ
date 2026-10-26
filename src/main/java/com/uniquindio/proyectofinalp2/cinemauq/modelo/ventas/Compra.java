@@ -11,11 +11,15 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.Cobro;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.CobroBase;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.DescuentoPromocion;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.DescuentoPuntos;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.RecargoIva;
 
 /*
- PATRÓN CREACIONAL: BUILDER
- Compra es el producto y solo se crea con Compra.Builder.
- Cálculo del total: subtotal -> promoción -> puntos -> IVA.
+ Creacional: Builder (Compra solo se crea con Compra.Builder).
+ Estructural: Decorator (el total se calcula con una cadena de Cobro).
 */
 public class Compra {
 
@@ -25,9 +29,10 @@ public class Compra {
     private final Funcion funcion;
     private final List<Entrada> entradas;
     private final Combo combo;
-    private final Promocion promocion;
+    private final List<Promocion> promociones;
     private final int puntosRedimidos;
     private final double total;
+    private final String descripcionCobro;
     private EstadoCompra estado;
 
     private Compra(Builder b) {
@@ -37,18 +42,19 @@ public class Compra {
         this.funcion = b.funcion;
         this.entradas = new ArrayList<>(b.entradas);
         this.combo = b.combo;
-        this.promocion = b.promocion;
+        this.promociones = new ArrayList<>(b.promociones);
         this.puntosRedimidos = b.puntosRedimidos;
 
-        double base = calcularBase(entradas, combo, promocion);
-        base = base - (puntosRedimidos * b.config.getValorPunto());
-        this.total = base + (base * b.config.getIva());
+        Cobro cobro = armarCobro(entradas, combo, promociones, puntosRedimidos, b.config);
+        this.total = cobro.getValor();
+        this.descripcionCobro = cobro.getDescripcion();
 
         this.estado = EstadoCompra.PENDIENTE;
     }
 
-    // Subtotal de entradas y combo, con la promoción aplicada.
-    private static double calcularBase(List<Entrada> entradas, Combo combo, Promocion promocion) {
+    // Cadena: subtotal -> promociones -> puntos -> IVA.
+    private static Cobro armarCobro(List<Entrada> entradas, Combo combo, List<Promocion> promociones,
+                                    int puntos, ConfiguracionCine config) {
         double subtotal = 0;
         for (Entrada e : entradas) {
             subtotal += e.getPrecio();
@@ -56,10 +62,15 @@ public class Compra {
         if (combo != null) {
             subtotal += combo.getPrecio();
         }
-        if (promocion != null) {
-            subtotal = promocion.aplicar(subtotal);
+
+        Cobro cobro = new CobroBase(subtotal);
+        for (Promocion p : promociones) {
+            cobro = new DescuentoPromocion(cobro, p);
         }
-        return subtotal;
+        if (puntos > 0) {
+            cobro = new DescuentoPuntos(cobro, puntos, config.getValorPunto());
+        }
+        return new RecargoIva(cobro, config.getIva());
     }
 
     public void marcarPagada() {
@@ -94,8 +105,8 @@ public class Compra {
         return combo;
     }
 
-    public Promocion getPromocion() {
-        return promocion;
+    public List<Promocion> getPromociones() {
+        return Collections.unmodifiableList(promociones);
     }
 
     public int getPuntosRedimidos() {
@@ -104,6 +115,10 @@ public class Compra {
 
     public double getTotal() {
         return total;
+    }
+
+    public String getDescripcionCobro() {
+        return descripcionCobro;
     }
 
     public EstadoCompra getEstado() {
@@ -123,7 +138,7 @@ public class Compra {
 
         // Opcionales
         private Combo combo;
-        private Promocion promocion;
+        private final List<Promocion> promociones = new ArrayList<>();
         private int puntosRedimidos = 0;
 
         public Builder(ConfiguracionCine config) {
@@ -154,7 +169,10 @@ public class Compra {
         }
 
         public Builder promocion(Promocion promocion) {
-            this.promocion = promocion;
+            if (promocion == null) {
+                throw new IllegalArgumentException("La promoción no puede ser nula");
+            }
+            this.promociones.add(promocion);
             return this;
         }
 
@@ -181,11 +199,6 @@ public class Compra {
                     throw new IllegalStateException(
                             "Todas las entradas deben pertenecer a la función de la compra");
                 }
-            }
-            double base = calcularBase(entradas, combo, promocion);
-            if (puntosRedimidos * config.getValorPunto() > base) {
-                throw new IllegalStateException(
-                        "Los puntos redimidos superan el valor de la compra");
             }
             return new Compra(this);
         }
