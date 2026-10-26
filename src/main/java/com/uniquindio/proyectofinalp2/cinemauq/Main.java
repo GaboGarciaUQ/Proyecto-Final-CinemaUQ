@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorHtml;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Pelicula;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Sala;
@@ -30,6 +32,10 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.Gen
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorTxt;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConsecutivoFactura;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Tarjeta;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.TarjetaVirtual;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Administrador;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.TarjetaProxy;
 
 public class Main {
 
@@ -110,7 +116,7 @@ public class Main {
         List<String> detalleReporte = new ArrayList<>();
         detalleReporte.add("Interestelar - 3 entradas - $45000");
         detalleReporte.add("Avatar - 2 entradas - $30000");
-        GeneradorReporte[] generadores = {new GeneradorTxt(), new GeneradorCsv(), new GeneradorPdf()};
+        GeneradorReporte[] generadores = {new GeneradorTxt(), new GeneradorCsv(), new GeneradorPdf(), new GeneradorHtml()};
         for (GeneradorReporte g : generadores) {
             try {
                 Path archivo = g.generar("Ventas por periodo", "01/10/2026 - 14/10/2026",
@@ -176,5 +182,76 @@ public class Main {
         } catch (IllegalStateException e) {
             System.out.println("Demasiados puntos: " + e.getMessage());
         }
+                System.out.println("\n=== PROXY ===");
+        Administrador admin = new Administrador("A1", "Carlos", "admin@cinemauq.com");
+        Cliente intruso = new Cliente("2", "Luis", "luis@correo.com");
+        TarjetaVirtual tarjetaReal = new TarjetaVirtual("T1", cliente);
+
+        Tarjeta tarjetaCliente = new TarjetaProxy(tarjetaReal, cliente);
+        Tarjeta tarjetaAdmin = new TarjetaProxy(tarjetaReal, admin);
+        Tarjeta tarjetaIntruso = new TarjetaProxy(tarjetaReal, intruso);
+
+        tarjetaAdmin.recargar(100000);
+        System.out.println("Saldo tras la recarga del admin: $" + tarjetaCliente.getSaldo());
+        tarjetaCliente.pagar(minima.getTotal(), minima.getId());
+        minima.marcarPagada();
+        System.out.println("Saldo tras pagar la compra: $" + tarjetaCliente.getSaldo());
+        System.out.println("Movimientos: " + tarjetaAdmin.getMovimientos().size());
+
+        try {
+            tarjetaCliente.recargar(50000);
+        } catch (SecurityException e) {
+            System.out.println("Cliente intenta recargar: " + e.getMessage());
+        }
+        try {
+            tarjetaIntruso.getSaldo();
+        } catch (SecurityException e) {
+            System.out.println("Otro cliente consulta el saldo: " + e.getMessage());
+        }
+        try {
+            tarjetaAdmin.pagar(1000, "X");
+        } catch (SecurityException e) {
+            System.out.println("Admin intenta pagar: " + e.getMessage());
+        }
+
+        tarjetaAdmin.desactivar();
+        try {
+            tarjetaCliente.pagar(1000, "X");
+        } catch (IllegalStateException e) {
+            System.out.println("Tarjeta inactiva: " + e.getMessage());
+        }
+        tarjetaAdmin.activar();
+        try {
+            tarjetaCliente.pagar(10000000, "X");
+        } catch (IllegalStateException e) {
+            System.out.println("Pago sin saldo: " + e.getMessage());
+        }
+                System.out.println("\n=== FACADE ===");
+        CompraFacade fachada = new CompraFacade(config);
+        Funcion funcionFachada = new Funcion("F3", peliculaInterstellar, sala3D,
+                LocalDateTime.now().plusDays(4), 15000);
+        System.out.println("Asientos libres: " + fachada.asientosDisponibles(funcionFachada).size());
+
+        List<Asiento> elegidos = List.of(buscar(sala3D, 'B', 1), buscar(sala3D, 'B', 2));
+        Compra compraFachada = fachada.comprar(tarjetaCliente, funcionFachada, elegidos,
+                combo, List.of(promocion), 0);
+        System.out.println("Compra: $" + compraFachada.getTotal() + " - " + compraFachada.getEstado());
+        System.out.println("Detalle: " + compraFachada.getDescripcionCobro());
+        System.out.println("Saldo de la tarjeta: $" + tarjetaCliente.getSaldo());
+        System.out.println("Asientos libres: " + fachada.asientosDisponibles(funcionFachada).size());
+
+        List<Asiento> otros = List.of(buscar(sala3D, 'C', 1), buscar(sala3D, 'C', 2));
+        try {
+            fachada.comprar(tarjetaCliente, funcionFachada, otros, null, List.of(), 0);
+        } catch (IllegalStateException e) {
+            System.out.println("Compra sin saldo: " + e.getMessage());
+        }
+        try {
+            fachada.comprar(tarjetaIntruso, funcionFachada, otros, null, List.of(), 0);
+        } catch (SecurityException e) {
+            System.out.println("Compra con tarjeta ajena: " + e.getMessage());
+        }
+        System.out.println("Asientos libres tras los fallos: "
+                + fachada.asientosDisponibles(funcionFachada).size());
     }
 }
