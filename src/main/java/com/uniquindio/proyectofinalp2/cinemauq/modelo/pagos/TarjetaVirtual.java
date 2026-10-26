@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.SaldoInsuficienteException;
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.TarjetaInactivaException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 
 // RealSubject: aplica las reglas del saldo; no sabe quién la usa.
@@ -31,10 +33,10 @@ public class TarjetaVirtual implements Tarjeta {
     public void pagar(double monto, String referencia) {
         validarMonto(monto);
         if (!activa) {
-            throw new IllegalStateException("La tarjeta está inactiva");
+            throw new TarjetaInactivaException();
         }
         if (monto > saldo) {
-            throw new IllegalStateException("Saldo insuficiente");
+            throw new SaldoInsuficienteException(saldo, monto);
         }
         saldo -= monto;
         registrar(TipoMovimiento.PAGO, monto, referencia);

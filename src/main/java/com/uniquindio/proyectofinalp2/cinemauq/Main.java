@@ -7,34 +7,35 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CinemaException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorHtml;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Pelicula;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Sala;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Producto;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Tarjeta;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.TarjetaVirtual;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Administrador;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Promocion;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory2D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory3D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory4DX;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.EntradaAccesibleFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.EntradaFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.EntradaGeneralFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorCsv;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorHtml;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorPdf;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorReporte;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorTxt;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConsecutivoFactura;
-import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Tarjeta;
-import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.TarjetaVirtual;
-import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Administrador;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.TarjetaProxy;
 
 public class Main {
@@ -108,7 +109,7 @@ public class Main {
 
         try {
             fabricaGeneral.emitirEntrada(funcion, asientoA1);
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Asiento vendido dos veces: " + e.getMessage());
         }
 
@@ -160,26 +161,26 @@ public class Main {
         System.out.println("\n=== VALIDACIONES DEL BUILDER ===");
         try {
             new Compra.Builder(config).cliente(cliente).funcion(funcion).build();
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Sin entradas: " + e.getMessage());
         }
 
         try {
             new Compra.Builder(config).funcion(funcion).entrada(entrada1).build();
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Sin cliente: " + e.getMessage());
         }
 
         try {
             new Compra.Builder(config).cliente(cliente).funcion(copia).entrada(entrada1).build();
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Función distinta: " + e.getMessage());
         }
 
         try {
             new Compra.Builder(config).cliente(cliente).funcion(funcion).entrada(entrada1)
                     .puntosRedimidos(100000).build();
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Demasiados puntos: " + e.getMessage());
         }
                 System.out.println("\n=== PROXY ===");
@@ -200,30 +201,30 @@ public class Main {
 
         try {
             tarjetaCliente.recargar(50000);
-        } catch (SecurityException e) {
+        } catch (CinemaException e) {
             System.out.println("Cliente intenta recargar: " + e.getMessage());
         }
         try {
             tarjetaIntruso.getSaldo();
-        } catch (SecurityException e) {
+        } catch (CinemaException e) {
             System.out.println("Otro cliente consulta el saldo: " + e.getMessage());
         }
         try {
             tarjetaAdmin.pagar(1000, "X");
-        } catch (SecurityException e) {
+        } catch (CinemaException e) {
             System.out.println("Admin intenta pagar: " + e.getMessage());
         }
 
         tarjetaAdmin.desactivar();
         try {
             tarjetaCliente.pagar(1000, "X");
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Tarjeta inactiva: " + e.getMessage());
         }
         tarjetaAdmin.activar();
         try {
             tarjetaCliente.pagar(10000000, "X");
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Pago sin saldo: " + e.getMessage());
         }
                 System.out.println("\n=== FACADE ===");
@@ -243,12 +244,12 @@ public class Main {
         List<Asiento> otros = List.of(buscar(sala3D, 'C', 1), buscar(sala3D, 'C', 2));
         try {
             fachada.comprar(tarjetaCliente, funcionFachada, otros, null, List.of(), 0);
-        } catch (IllegalStateException e) {
+        } catch (CinemaException e) {
             System.out.println("Compra sin saldo: " + e.getMessage());
         }
         try {
             fachada.comprar(tarjetaIntruso, funcionFachada, otros, null, List.of(), 0);
-        } catch (SecurityException e) {
+        } catch (CinemaException e) {
             System.out.println("Compra con tarjeta ajena: " + e.getMessage());
         }
         System.out.println("Asientos libres tras los fallos: "

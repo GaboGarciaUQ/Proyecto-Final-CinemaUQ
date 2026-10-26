@@ -3,6 +3,7 @@ package com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy;
 import java.util.List;
 import java.util.Objects;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.AccesoDenegadoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Movimiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Tarjeta;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
@@ -89,6 +90,6 @@ public class TarjetaProxy implements Tarjeta {
     }
 
     private void denegar(String operacion) {
-        throw new SecurityException("Acceso denegado: " + actor.getNombre() + " no puede " + operacion);
+        throw new AccesoDenegadoException(actor.getNombre(), operacion);
     }
 }

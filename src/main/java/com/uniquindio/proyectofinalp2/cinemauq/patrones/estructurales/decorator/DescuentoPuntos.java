@@ -1,5 +1,7 @@
 package com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CompraInvalidaException;
+
 // ConcreteDecorator: descuenta el valor de los puntos redimidos.
 public class DescuentoPuntos extends CobroDecorator {
 
@@ -15,7 +17,7 @@ public class DescuentoPuntos extends CobroDecorator {
             throw new IllegalArgumentException("El valor del punto debe ser mayor a cero");
         }
         if (puntos * valorPunto > envuelto.getValor()) {
-            throw new IllegalStateException("Los puntos redimidos superan el valor de la compra");
+            throw new CompraInvalidaException("Los puntos redimidos superan el valor de la compra");
         }
         this.puntos = puntos;
         this.valorPunto = valorPunto;

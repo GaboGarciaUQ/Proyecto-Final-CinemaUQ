@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CorreoInvalidoException;
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.TarjetaNoEncontradaException;
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.UsuarioDuplicadoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Pelicula;
@@ -65,10 +68,10 @@ public class CineServicio {
 
         public Cliente registrarCliente(String nombre, String correo) {
         if (correo == null || !correo.contains("@")) {
-            throw new IllegalArgumentException("Escribe un correo válido");
+            throw new CorreoInvalidoException();
         }
         if (usuarios.containsKey(normalizar(correo))) {
-            throw new IllegalStateException("Ya existe una cuenta con ese correo");
+            throw new UsuarioDuplicadoException(correo);
         }
         consecutivoCliente++;
         Cliente cliente = new Cliente("C" + consecutivoCliente, nombre.trim(), normalizar(correo));
@@ -80,7 +83,7 @@ public class CineServicio {
         public Tarjeta getTarjeta(Cliente cliente) {
         TarjetaVirtual real = tarjetas.get(cliente.getId());
         if (real == null) {
-            throw new IllegalStateException("El cliente no tiene tarjeta virtual");
+            throw new TarjetaNoEncontradaException();
         }
         return new TarjetaProxy(real, cliente);
     }

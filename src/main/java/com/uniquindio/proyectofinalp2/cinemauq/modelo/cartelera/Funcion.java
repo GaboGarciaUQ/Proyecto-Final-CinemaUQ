@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.AsientoNoDisponibleException;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.prototype.Prototipo;
 
 public class Funcion implements Prototipo<Funcion> {
@@ -30,7 +31,7 @@ public class Funcion implements Prototipo<Funcion> {
 
     public void ocupar(Asiento a) {
         if (!estaDisponible(a)) {
-            throw new IllegalStateException("Asiento no disponible: " + a);
+            throw new AsientoNoDisponibleException(a);
         }
         ocupados.add(a);
     }

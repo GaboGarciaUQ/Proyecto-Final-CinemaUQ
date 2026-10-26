@@ -1,5 +1,6 @@
 package com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.AsientoNoDisponibleException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
@@ -15,7 +16,7 @@ public abstract class EntradaFactory {
             throw new IllegalArgumentException("La función y el asiento son obligatorios");
         }
         if (!funcion.estaDisponible(asiento)) {
-            throw new IllegalStateException("Asiento no disponible: " + asiento);
+            throw new AsientoNoDisponibleException(asiento);
         }
         Entrada entrada = crearEntrada(funcion, asiento);
         funcion.ocupar(asiento);

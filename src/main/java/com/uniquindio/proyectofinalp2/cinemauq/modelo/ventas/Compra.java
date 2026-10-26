@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CompraInvalidaException;
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.EstadoInvalidoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
@@ -75,7 +77,7 @@ public class Compra {
 
     public void marcarPagada() {
         if (estado != EstadoCompra.PENDIENTE) {
-            throw new IllegalStateException(
+            throw new EstadoInvalidoException(
                     "Solo una compra pendiente puede pagarse (estado: " + estado + ")");
         }
         estado = EstadoCompra.PAGADA;
@@ -183,20 +185,20 @@ public class Compra {
 
         public Compra build() {
             if (cliente == null) {
-                throw new IllegalStateException("La compra necesita un cliente");
+                throw new CompraInvalidaException("La compra necesita un cliente");
             }
             if (funcion == null) {
-                throw new IllegalStateException("La compra necesita una función");
+                throw new CompraInvalidaException("La compra necesita una función");
             }
             if (entradas.isEmpty()) {
-                throw new IllegalStateException("Debe elegir al menos un asiento (entrada)");
+                throw new CompraInvalidaException("Debe elegir al menos un asiento (entrada)");
             }
             if (puntosRedimidos < 0) {
-                throw new IllegalStateException("Los puntos redimidos no pueden ser negativos");
+                throw new CompraInvalidaException("Los puntos redimidos no pueden ser negativos");
             }
             for (Entrada e : entradas) {
                 if (e.getFuncion() != funcion) {
-                    throw new IllegalStateException(
+                    throw new CompraInvalidaException(
                             "Todas las entradas deben pertenecer a la función de la compra");
                 }
             }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.CarteleraController">
+    <top>
+        <fx:include source="BarraSuperiorView.fxml"/>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <VBox spacing="22" style="-fx-padding: 28 40 40 40;">
+                <VBox spacing="4">
+                    <Label text="Cartelera" styleClass="titulo"/>
+                    <Label fx:id="lblResumen" styleClass="subtitulo"/>
+                </VBox>
+                <FlowPane fx:id="contenedorPeliculas" hgap="24" vgap="24"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.CompraController"
+            styleClass="fondo">
+    <top>
+        <fx:include fx:id="barra" source="BarraSuperiorView.fxml"/>
+    </top>
+    <center>
+        <StackPane>
+            <padding>
+                <Insets top="20" right="24" bottom="24" left="24"/>
+            </padding>
+
+            <HBox fx:id="vistaPago" spacing="20">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-transparente" HBox.hgrow="ALWAYS">
+                    <VBox spacing="12">
+                        <padding>
+                            <Insets right="8"/>
+                        </padding>
+                        <Label text="Resumen de tu compra" styleClass="titulo-seccion"/>
+                        <VBox styleClass="panel" spacing="8">
+                            <Label fx:id="lblPelicula" styleClass="subtitulo" wrapText="true"/>
+                            <Label fx:id="lblFuncion" styleClass="texto-suave" wrapText="true"/>
+                        </VBox>
+                        <Label text="ENTRADAS" styleClass="etiqueta-campo"/>
+                        <VBox fx:id="lineasEntradas" styleClass="panel" spacing="6"/>
+                        <Label fx:id="tituloConfiteria" text="CONFITERÃA" styleClass="etiqueta-campo"/>
+                        <VBox fx:id="lineasConfiteria" styleClass="panel" spacing="6"/>
+                        <Label text="PROMOCIONES" styleClass="etiqueta-campo"/>
+                        <VBox fx:id="listaPromociones" styleClass="panel" spacing="8"/>
+                    </VBox>
+                </ScrollPane>
+
+                <VBox styleClass="panel" spacing="12" prefWidth="340" minWidth="340" maxWidth="340">
+                    <Label text="PAGO" styleClass="etiqueta-campo"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Subtotal" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblSubtotal" styleClass="precio"/>
+                    </HBox>
+                    <HBox fx:id="filaDescuento" alignment="CENTER_LEFT">
+                        <Label text="Descuentos" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblDescuento" styleClass="precio"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label fx:id="lblEtiquetaIva" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblIva" styleClass="precio"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="TOTAL" styleClass="etiqueta-campo" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblTotal" styleClass="total"/>
+                    </HBox>
+                    <Label fx:id="lblPuntos" styleClass="texto-suave"/>
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label text="TARJETA VIRTUAL" styleClass="etiqueta-campo"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Saldo disponible" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblSaldo" styleClass="precio"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Saldo despuÃ©s del pago" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblSaldoFinal" styleClass="precio"/>
+                    </HBox>
+                    <Label fx:id="lblError" styleClass="error-texto" wrapText="true"/>
+                    <Button fx:id="btnPagar" text="PAGAR CON TARJETA" styleClass="boton-primario"
+                            maxWidth="Infinity" onAction="#pagar"/>
+                    <Button fx:id="btnVolver" text="VOLVER" styleClass="boton-secundario"
+                            maxWidth="Infinity" onAction="#volver"/>
+                </VBox>
+            </HBox>
+
+            <VBox fx:id="vistaConfirmacion" styleClass="panel" spacing="12" alignment="CENTER"
+                  maxWidth="460" maxHeight="440" visible="false" managed="false">
+                <Label text="¡Compra exitosa!" styleClass="titulo-seccion"/>
+                <Label fx:id="lblCodigo" styleClass="texto-suave"/>
+                <Label fx:id="lblConfPelicula" styleClass="subtitulo" wrapText="true"/>
+                <Label fx:id="lblConfAsientos" styleClass="texto-suave" wrapText="true"/>
+                <Label fx:id="lblConfTotal" styleClass="total"/>
+                <Label fx:id="lblConfPuntos" styleClass="texto-suave"/>
+                <Label fx:id="lblConfSaldo" styleClass="texto-suave"/>
+                <Button text="VER CARTELERA" styleClass="boton-primario" onAction="#terminar"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>

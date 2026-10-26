@@ -1,0 +1,467 @@
+.root {
+    -cine-morado: #3B146B;
+    -cine-ciruela: #7B208F;
+    -cine-fucsia: #C9349B;
+    -cine-coral: #F36A78;
+    -cine-salmon: #F87572;
+    -cine-naranja: #FF9B55;
+    -cine-ambar: #FFB458;
+
+    -cine-noche: derive(-cine-morado, -62%);
+    -cine-medianoche: derive(-cine-morado, -48%);
+    -cine-texto: #F6EFFF;
+    -cine-texto-suave: #C9B6E4;
+    -cine-ocupado: #2A2233;
+
+    -fx-background-color: -cine-noche;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: -cine-texto;
+    -fx-focus-color: -cine-ambar;
+    -fx-faint-focus-color: transparent;
+}
+
+.label {
+    -fx-text-fill: -cine-texto;
+}
+
+.logo {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cine-ambar;
+}
+
+.titulo {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cine-ambar;
+}
+
+.titulo-seccion {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.subtitulo {
+    -fx-font-size: 16px;
+    -fx-text-fill: -cine-texto-suave;
+}
+
+.texto-suave {
+    -fx-text-fill: -cine-texto-suave;
+}
+
+.texto-pequeno {
+    -fx-font-size: 12px;
+}
+
+.etiqueta-campo {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cine-texto-suave;
+}
+
+.precio {
+    -fx-font-weight: bold;
+    -fx-text-fill: -cine-ambar;
+}
+
+.total {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cine-ambar;
+}
+
+.error-texto {
+    -fx-text-fill: -cine-coral;
+}
+
+.exito-texto {
+    -fx-text-fill: -cine-ambar;
+}
+
+.insignia {
+    -fx-background-color: rgba(201, 52, 155, 0.28);
+    -fx-background-radius: 8;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cine-ambar;
+}
+
+.barra-superior {
+    -fx-background-color: -cine-medianoche;
+    -fx-padding: 14 28 14 28;
+    -fx-border-color: transparent transparent -cine-morado transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.panel {
+    -fx-background-color: -cine-medianoche;
+    -fx-background-radius: 14;
+    -fx-border-color: -cine-morado;
+    -fx-border-radius: 14;
+    -fx-padding: 18;
+}
+
+.panel-pelicula {
+    -fx-background-color: -cine-medianoche;
+    -fx-background-radius: 14;
+    -fx-border-color: -cine-morado;
+    -fx-border-radius: 14;
+    -fx-padding: 14;
+}
+
+.panel-pelicula:hover {
+    -fx-border-color: -cine-fucsia;
+    -fx-cursor: hand;
+}
+
+.afiche {
+    -fx-background-radius: 10;
+}
+
+.afiche-0 { -fx-background-color: linear-gradient(to bottom right, -cine-morado, -cine-fucsia); }
+.afiche-1 { -fx-background-color: linear-gradient(to bottom right, -cine-ciruela, -cine-coral); }
+.afiche-2 { -fx-background-color: linear-gradient(to bottom right, -cine-morado, -cine-naranja); }
+.afiche-3 { -fx-background-color: linear-gradient(to bottom right, -cine-fucsia, -cine-ambar); }
+.afiche-4 { -fx-background-color: linear-gradient(to bottom right, -cine-ciruela, -cine-naranja); }
+.afiche-5 { -fx-background-color: linear-gradient(to bottom right, -cine-morado, -cine-salmon); }
+
+.afiche-titulo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 8, 0.2, 0, 2);
+}
+
+.boton-primario {
+    -fx-background-color: linear-gradient(to right, -cine-naranja, -cine-ambar);
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-text-fill: -cine-noche;
+    -fx-font-weight: bold;
+    -fx-padding: 11 26 11 26;
+    -fx-cursor: hand;
+}
+
+.boton-primario:hover {
+    -fx-background-color: linear-gradient(to right, -cine-salmon, -cine-naranja);
+}
+
+.boton-primario:pressed {
+    -fx-opacity: 0.85;
+}
+
+.boton-primario:focused,
+.boton-secundario:focused,
+.chip:focused,
+.asiento:focused {
+    -fx-border-color: -cine-texto;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+}
+
+.boton-secundario {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: -cine-fucsia;
+    -fx-border-radius: 10;
+    -fx-text-fill: -cine-texto;
+    -fx-padding: 10 22 10 22;
+    -fx-cursor: hand;
+}
+
+.boton-secundario:hover {
+    -fx-background-color: rgba(201, 52, 155, 0.22);
+}
+
+.boton-texto {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -cine-texto-suave;
+    -fx-padding: 6 10 6 10;
+    -fx-cursor: hand;
+}
+
+.boton-texto:hover {
+    -fx-text-fill: -cine-ambar;
+    -fx-underline: true;
+}
+
+.boton-cantidad {
+    -fx-background-color: -cine-ciruela;
+    -fx-background-insets: 0;
+    -fx-background-radius: 16;
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-max-width: 32;
+    -fx-max-height: 32;
+    -fx-padding: 0;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.boton-cantidad:hover {
+    -fx-background-color: -cine-fucsia;
+}
+
+.button:disabled,
+.toggle-button:disabled {
+    -fx-opacity: 0.4;
+}
+
+.chip {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 20;
+    -fx-border-color: -cine-ciruela;
+    -fx-border-radius: 20;
+    -fx-text-fill: -cine-texto;
+    -fx-padding: 8 18 8 18;
+    -fx-cursor: hand;
+}
+
+.chip:hover {
+    -fx-border-color: -cine-fucsia;
+}
+
+.chip:selected {
+    -fx-background-color: linear-gradient(to right, -cine-naranja, -cine-ambar);
+    -fx-border-color: transparent;
+    -fx-text-fill: -cine-noche;
+    -fx-font-weight: bold;
+}
+
+.text-field,
+.password-field {
+    -fx-background-color: -cine-noche;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: -cine-ciruela;
+    -fx-border-radius: 10;
+    -fx-text-fill: -cine-texto;
+    -fx-prompt-text-fill: derive(-cine-texto-suave, -35%);
+    -fx-padding: 10 14 10 14;
+}
+
+.text-field:focused,
+.password-field:focused {
+    -fx-border-color: -cine-ambar;
+}
+
+.combo-box {
+    -fx-background-color: -cine-noche;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: -cine-ciruela;
+    -fx-border-radius: 10;
+    -fx-padding: 2 4 2 4;
+}
+
+.combo-box:focused {
+    -fx-border-color: -cine-ambar;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cine-texto;
+}
+
+.combo-box .arrow {
+    -fx-background-color: -cine-texto-suave;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -cine-medianoche;
+    -fx-border-color: -cine-ciruela;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: -cine-medianoche;
+    -fx-text-fill: -cine-texto;
+    -fx-padding: 8 12 8 12;
+}
+
+.combo-box-popup .list-cell:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -cine-ciruela;
+    -fx-text-fill: white;
+}
+
+.separator .line {
+    -fx-border-color: -cine-morado;
+    -fx-border-width: 1 0 0 0;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
+    -fx-padding: 0;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -cine-ciruela;
+    -fx-background-radius: 6;
+    -fx-background-insets: 2;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -cine-fucsia;
+}
+
+.scroll-bar > .increment-button,
+.scroll-bar > .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+.pantalla-cine {
+    -fx-background-color: linear-gradient(to right, transparent, -cine-ambar, transparent);
+    -fx-min-height: 5;
+    -fx-pref-height: 5;
+    -fx-max-height: 5;
+    -fx-effect: dropshadow(gaussian, rgba(255, 180, 88, 0.6), 26, 0.3, 0, 8);
+}
+
+.asiento {
+    -fx-background-insets: 0;
+    -fx-background-radius: 9 9 4 4;
+    -fx-min-width: 38;
+    -fx-pref-width: 38;
+    -fx-max-width: 38;
+    -fx-min-height: 34;
+    -fx-pref-height: 34;
+    -fx-max-height: 34;
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.asiento:disabled {
+    -fx-opacity: 1;
+    -fx-cursor: default;
+}
+
+.asiento-disponible {
+    -fx-background-color: -cine-ciruela;
+    -fx-text-fill: white;
+}
+
+.asiento-disponible:hover {
+    -fx-background-color: -cine-fucsia;
+}
+
+.asiento-seleccionado {
+    -fx-background-color: linear-gradient(to bottom, -cine-ambar, -cine-naranja);
+    -fx-text-fill: -cine-noche;
+    -fx-font-weight: bold;
+}
+
+.asiento-seleccionado:hover {
+    -fx-background-color: linear-gradient(to bottom, -cine-naranja, -cine-salmon);
+}
+
+.asiento-ocupado {
+    -fx-background-color: -cine-ocupado;
+    -fx-text-fill: derive(-cine-ocupado, 35%);
+}
+
+.asiento-accesible {
+    -fx-border-color: -cine-ambar;
+    -fx-border-width: 2;
+    -fx-border-radius: 9 9 4 4;
+}
+
+.leyenda-cuadro {
+    -fx-min-width: 16;
+    -fx-pref-width: 16;
+    -fx-max-width: 16;
+    -fx-min-height: 16;
+    -fx-pref-height: 16;
+    -fx-max-height: 16;
+    -fx-background-radius: 5;
+}
+
+.fila-letra {
+    -fx-font-weight: bold;
+    -fx-text-fill: -cine-texto-suave;
+    -fx-min-width: 22;
+    -fx-alignment: center;
+}
+
+.tooltip {
+    -fx-background-color: -cine-medianoche;
+    -fx-background-radius: 8;
+    -fx-border-color: -cine-fucsia;
+    -fx-border-radius: 8;
+    -fx-text-fill: -cine-texto;
+    -fx-font-size: 12px;
+}
+
+.dialog-pane {
+    -fx-background-color: -cine-medianoche;
+}
+
+.dialog-pane .label {
+    -fx-text-fill: -cine-texto;
+}
+
+.dialog-pane > .button-bar > .container {
+    -fx-background-color: -cine-medianoche;
+}
+
+.dialog-pane > .header-panel {
+    -fx-background-color: -cine-morado;
+}
+
+.dialog-pane > .header-panel .label {
+    -fx-text-fill: -cine-ambar;
+    -fx-font-weight: bold;
+}
+
+.panel-marca {
+    -fx-background-color: linear-gradient(to bottom right, -cine-morado, -cine-ciruela 55%, -cine-fucsia);
+    -fx-padding: 56;
+}
+
+.marca-nombre {
+    -fx-font-size: 56px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 14, 0.2, 0, 3);
+}
+
+.marca-lema {
+    -fx-font-size: 19px;
+    -fx-text-fill: rgba(255, 255, 255, 0.88);
+}
+
+.check-cine {
+    -fx-text-fill: #F1EAFB;
+    -fx-font-size: 14px;
+}
+.check-cine:selected .mark {
+    -fx-background-color: #FF9B55;
+}
