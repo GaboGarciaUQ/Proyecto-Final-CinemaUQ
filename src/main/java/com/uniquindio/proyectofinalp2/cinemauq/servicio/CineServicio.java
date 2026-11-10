@@ -36,6 +36,10 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Promocion;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory2D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory3D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory4DX;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.EstrategiaPuntos;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.PuntosAcumulados;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.PuntosBase;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.ServicioPuntos;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.TarjetaProxy;
@@ -43,6 +47,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.Tarj
 public class CineServicio {
     private final ConfiguracionCine config = ConfiguracionCine.getInstancia();
     private final CompraFacade fachada = new CompraFacade(config);
+    private final ServicioPuntos servicioPuntos = new ServicioPuntos(config, new PuntosBase(config));
 
     private final Administrador administrador = new Administrador("A1", "Carlos Ruiz", "admin@cinemauq.com");
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
@@ -144,6 +149,7 @@ public class CineServicio {
         Compra compra = fachada.comprar(getTarjeta(cliente), funcion, asientos,
                 armarConfiteria(confiteria), promocionesAplicadas, 0);
         compras.add(compra);
+        servicioPuntos.confirmarCompra(compra);
         return compra;
     }
 
@@ -154,7 +160,19 @@ public class CineServicio {
     }
 
     public int puntosPorCompra(double total) {
-        return config.calcularPuntos(total);
+        return servicioPuntos.calcularPuntos(total);
+    }
+
+    public void setEstrategiaPuntos(EstrategiaPuntos estrategia) {
+        servicioPuntos.setEstrategia(estrategia);
+    }
+
+    public int getPuntosVigentes(Cliente cliente) {
+        return servicioPuntos.getPuntosVigentes(cliente);
+    }
+
+    public List<PuntosAcumulados> getHistorialPuntos(Cliente cliente) {
+        return servicioPuntos.getHistorial(cliente);
     }
 
     public ConfiguracionCine getConfig() {
