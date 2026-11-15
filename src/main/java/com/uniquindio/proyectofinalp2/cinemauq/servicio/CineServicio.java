@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.AccesoDenegadoException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CorreoInvalidoException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.TarjetaNoEncontradaException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.UsuarioDuplicadoException;
@@ -40,6 +41,8 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.PuntosAcumulados;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.PuntosBase;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.ServicioPuntos;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.PoliticaReembolso;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.ReembolsoPorAnticipacion;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.TarjetaProxy;
@@ -48,6 +51,8 @@ public class CineServicio {
     private final ConfiguracionCine config = ConfiguracionCine.getInstancia();
     private final CompraFacade fachada = new CompraFacade(config);
     private final ServicioPuntos servicioPuntos = new ServicioPuntos(config, new PuntosBase(config));
+    // Política cuando cancela el cliente (100 % / 80 % / no permitido). Strategy de reembolso.
+    private final PoliticaReembolso politicaCliente = new ReembolsoPorAnticipacion(config);
 
     private final Administrador administrador = new Administrador("A1", "Carlos Ruiz", "admin@cinemauq.com");
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
@@ -159,6 +164,23 @@ public class CineServicio {
                 .collect(Collectors.toList());
     }
 
+    /*
+     Cancela una compra del cliente y devuelve el dinero a su tarjeta.
+     El estado de la compra (State) decide si se puede y cuánto devolver (Strategy);
+     aquí solo se mueve el dinero. Si la compra ya estaba cancelada o reembolsada,
+     compra.cancelar lanza excepción antes de tocar la tarjeta.
+    */
+    public double cancelarCompra(Cliente cliente, Compra compra) {
+        if (!compra.getCliente().getId().equals(cliente.getId())) {
+            throw new AccesoDenegadoException(cliente.getNombre(), "cancelar una compra ajena");
+        }
+        double monto = compra.cancelar(politicaCliente, LocalDateTime.now());
+        if (monto > 0) {
+            tarjetaDelSistema(cliente).reembolsar(monto, compra.getId());
+        }
+        return monto;
+    }
+
     public int puntosPorCompra(double total) {
         return servicioPuntos.calcularPuntos(total);
     }
@@ -191,6 +213,15 @@ public class CineServicio {
         return asiento.esAccesible()
                 ? new EntradaAccesible(funcion, asiento)
                 : new EntradaGeneral(funcion, asiento);
+    }
+
+    // Tarjeta del cliente actuando como administrador (el sistema): solo el sistema acredita reembolsos.
+    private Tarjeta tarjetaDelSistema(Cliente cliente) {
+        TarjetaVirtual real = tarjetas.get(cliente.getId());
+        if (real == null) {
+            throw new TarjetaNoEncontradaException();
+        }
+        return new TarjetaProxy(real, administrador);
     }
 
     private String normalizar(String correo) {
