@@ -8,10 +8,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CompraInvalidaException;
-import com.uniquindio.proyectofinalp2.cinemauq.excepcion.EstadoInvalidoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.state.EstadoDeCompra;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.state.EstadoPendiente;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.PoliticaReembolso;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.Cobro;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.CobroBase;
@@ -22,6 +24,9 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.
 /*
  Creacional: Builder (Compra solo se crea con Compra.Builder).
  Estructural: Decorator (el total se calcula con una cadena de Cobro).
+ Comportamiento: State (Compra es el Contexto; su ciclo de vida lo manejan
+ los objetos EstadoDeCompra). Los estados que reembolsan usan Strategy
+ (PoliticaReembolso) para decidir si se permite y cuánto se devuelve.
 */
 public class Compra {
 
@@ -35,7 +40,8 @@ public class Compra {
     private final int puntosRedimidos;
     private final double total;
     private final String descripcionCobro;
-    private EstadoCompra estado;
+    private EstadoDeCompra estado;
+    private double montoReembolsado;
 
     private Compra(Builder b) {
         this.id = b.id;
@@ -51,7 +57,7 @@ public class Compra {
         this.total = cobro.getValor();
         this.descripcionCobro = cobro.getDescripcion();
 
-        this.estado = EstadoCompra.PENDIENTE;
+        this.estado = EstadoPendiente.INSTANCIA;
     }
 
     // Cadena: subtotal -> promociones -> puntos -> IVA.
@@ -75,12 +81,46 @@ public class Compra {
         return new RecargoIva(cobro, config.getIva());
     }
 
+    // ---- Operaciones del ciclo de vida: se delegan en el estado actual (State) ----
+
     public void marcarPagada() {
-        if (estado != EstadoCompra.PENDIENTE) {
-            throw new EstadoInvalidoException(
-                    "Solo una compra pendiente puede pagarse (estado: " + estado + ")");
+        estado.pagar(this);
+    }
+
+    /*
+     Cancela la compra según la política recibida (Strategy) y devuelve el
+     monto a reembolsar. Solo calcula: quien mueve el dinero a la tarjeta
+     es el servicio, no la compra.
+    */
+    public double cancelar(PoliticaReembolso politica, LocalDateTime ahora) {
+        return estado.cancelar(this, politica, ahora);
+    }
+
+    // ---- Métodos que invocan los estados (están en otro paquete, por eso son públicos) ----
+
+    public void cambiarEstado(EstadoDeCompra nuevoEstado) {
+        this.estado = Objects.requireNonNull(nuevoEstado, "El estado es obligatorio");
+    }
+
+    // Anula las entradas y devuelve los asientos a la función.
+    public void liberarEntradas() {
+        for (Entrada entrada : entradas) {
+            entrada.anular();
+            funcion.liberar(entrada.getAsiento());
         }
-        estado = EstadoCompra.PAGADA;
+    }
+
+    /*
+     Anota el monto devuelto. La tolerancia de 0.01 existe porque el total
+     (con IVA) puede tener más de dos decimales y el reembolso se redondea
+     a dos: un reembolso del 100 % podría superar el total por medio centavo.
+    */
+    public void registrarReembolso(double monto) {
+        if (monto < 0 || monto > total + 0.01) {
+            throw new CompraInvalidaException(
+                    "El reembolso no puede ser negativo ni superar el total pagado");
+        }
+        this.montoReembolsado = monto;
     }
 
     public String getId() {
@@ -123,8 +163,13 @@ public class Compra {
         return descripcionCobro;
     }
 
+    // Se sigue exponiendo el enum para que reportes, puntos e interfaz no cambien.
     public EstadoCompra getEstado() {
-        return estado;
+        return estado.getEstado();
+    }
+
+    public double getMontoReembolsado() {
+        return montoReembolsado;
     }
 
     public static class Builder {

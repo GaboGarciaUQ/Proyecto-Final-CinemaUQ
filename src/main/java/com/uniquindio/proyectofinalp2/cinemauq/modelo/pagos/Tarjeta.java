@@ -17,6 +17,9 @@ public interface Tarjeta {
 
     void recargar(double monto);
 
+    // Devuelve a la tarjeta el dinero de una compra cancelada. La referencia es el id de la compra.
+    void reembolsar(double monto, String referencia);
+
     void activar();
 
     void desactivar();

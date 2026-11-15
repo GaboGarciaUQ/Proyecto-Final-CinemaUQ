@@ -49,6 +49,18 @@ public class TarjetaVirtual implements Tarjeta {
         registrar(TipoMovimiento.RECARGA, monto, "Recarga");
     }
 
+    /*
+     No exige que la tarjeta esté activa: es dinero que ya era del cliente.
+     Si el cine desactivó la tarjeta después de la compra, el reembolso
+     debe llegar igual (si no, el cliente perdería su dinero).
+    */
+    @Override
+    public void reembolsar(double monto, String referencia) {
+        validarMonto(monto);
+        saldo += monto;
+        registrar(TipoMovimiento.REEMBOLSO, monto, referencia);
+    }
+
     @Override
     public void activar() {
         activa = true;

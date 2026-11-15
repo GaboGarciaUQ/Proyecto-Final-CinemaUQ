@@ -55,6 +55,16 @@ public class TarjetaProxy implements Tarjeta {
         real.recargar(monto);
     }
 
+    /*
+     Solo el administrador (el sistema) puede acreditar un reembolso. Si el
+     titular pudiera llamarlo, cualquier cliente podría darse saldo a sí mismo.
+    */
+    @Override
+    public void reembolsar(double monto, String referencia) {
+        exigirAdmin("reembolsar");
+        real.reembolsar(monto, referencia);
+    }
+
     @Override
     public void activar() {
         exigirAdmin("activar la tarjeta");
