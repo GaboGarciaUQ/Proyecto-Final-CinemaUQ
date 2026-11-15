@@ -36,6 +36,10 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EntradaAccesible;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EntradaGeneral;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EstadoCompra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Promocion;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.BandejaNotificaciones;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.EventoCine;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.ObservadorCine;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.PublicadorCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory2D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory3D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory4DX;
@@ -49,6 +53,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.TarjetaProxy;
+import com.uniquindio.proyectofinalp2.cinemauq.util.Formato;
 
 public class CineServicio {
     private final ConfiguracionCine config = ConfiguracionCine.getInstancia();
@@ -58,6 +63,9 @@ public class CineServicio {
     private final PoliticaReembolso politicaCliente = new ReembolsoPorAnticipacion(config);
     // Política cuando cancela el cine: siempre se devuelve el 100 % y no importa cuánto falte.
     private final PoliticaReembolso politicaCine = new ReembolsoFuncionCancelada(config);
+    // Observer: el servicio publica eventos sin saber quién los escucha. La bandeja guarda los avisos de cada cliente.
+    private final PublicadorCine publicador = new PublicadorCine();
+    private final BandejaNotificaciones bandeja = new BandejaNotificaciones();
 
     private final Administrador administrador = new Administrador("A1", "Carlos Ruiz", "admin@cinemauq.com");
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
@@ -71,6 +79,7 @@ public class CineServicio {
     private int consecutivoCliente = 0;
 
     public CineServicio() {
+        publicador.registrar(bandeja);
         cargarDatosIniciales();
     }
 
@@ -160,6 +169,9 @@ public class CineServicio {
                 armarConfiteria(confiteria), promocionesAplicadas, 0);
         compras.add(compra);
         servicioPuntos.confirmarCompra(compra);
+        publicador.publicar(new EventoCine(EventoCine.Tipo.COMPRA_PAGADA, cliente,
+                "Compra " + compra.getId() + " pagada por " + Formato.dinero(compra.getTotal())
+                        + " para " + descripcionFuncion(compra.getFuncion()) + "."));
         return compra;
     }
 
@@ -186,6 +198,9 @@ public class CineServicio {
         }
         if (compra.getEstado() == EstadoCompra.REEMBOLSADA) {
             servicioPuntos.revocarPuntos(compra);
+            publicador.publicar(new EventoCine(EventoCine.Tipo.COMPRA_REEMBOLSADA, cliente,
+                    "Compra " + compra.getId() + " cancelada: se devolvieron " + Formato.dinero(monto)
+                            + " a tu tarjeta."));
         }
         return monto;
     }
@@ -221,9 +236,36 @@ public class CineServicio {
                 tarjetaDelSistema(compra.getCliente()).reembolsar(monto, compra.getId());
             }
             servicioPuntos.revocarPuntos(compra);
+            publicador.publicar(new EventoCine(EventoCine.Tipo.FUNCION_CANCELADA, compra.getCliente(),
+                    "El cine canceló " + descripcionFuncion(funcion) + ". Tu compra " + compra.getId()
+                            + " fue reembolsada: " + Formato.dinero(monto) + " de vuelta en tu tarjeta."));
             reembolsadas++;
         }
         return reembolsadas;
+    }
+
+    /*
+     Recarga la tarjeta de un cliente. Quien exige que sea administrador es el Proxy de la tarjeta,
+     así que si el actor no lo es, lanza excepción y no se publica nada.
+    */
+    public void recargarTarjeta(Usuario actor, Cliente cliente, double monto) {
+        TarjetaVirtual real = tarjetas.get(cliente.getId());
+        if (real == null) {
+            throw new TarjetaNoEncontradaException();
+        }
+        new TarjetaProxy(real, actor).recargar(monto);
+        publicador.publicar(new EventoCine(EventoCine.Tipo.TARJETA_RECARGADA, cliente,
+                "Tu tarjeta fue recargada con " + Formato.dinero(monto) + "."));
+    }
+
+    // Las notificaciones del cliente, las más recientes primero.
+    public List<EventoCine> getNotificaciones(Cliente cliente) {
+        return bandeja.getNotificaciones(cliente);
+    }
+
+    // Para agregar otro canal de aviso (bitácora, correo simulado...) sin tocar el resto del servicio.
+    public void registrarObservador(ObservadorCine observador) {
+        publicador.registrar(observador);
     }
 
     public int puntosPorCompra(double total) {
@@ -252,6 +294,10 @@ public class CineServicio {
             return null;
         }
         return new Combo("CONF-" + System.nanoTime(), "Confitería", items, 0.0);
+    }
+
+    private String descripcionFuncion(Funcion funcion) {
+        return funcion.getPelicula().getTitulo() + " (" + Formato.fechaHora(funcion.getFechaHora()) + ")";
     }
 
     private Entrada crearEntradaSinReservar(Funcion funcion, Asiento asiento) {
