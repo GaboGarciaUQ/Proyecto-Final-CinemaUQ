@@ -40,9 +40,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.EventoCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.ObservadorCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.observer.PublicadorCine;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory2D;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory3D;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory4DX;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.ConsumoPuntos;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.EstrategiaPuntos;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.PuntosAcumulados;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.PuntosBase;
@@ -50,6 +48,9 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.PoliticaReembolso;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.ReembolsoFuncionCancelada;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.ReembolsoPorAnticipacion;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory2D;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory3D;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory4DX;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.proxy.TarjetaProxy;
@@ -61,9 +62,9 @@ public class CineServicio {
     private final ServicioPuntos servicioPuntos = new ServicioPuntos(config, new PuntosBase(config));
     // Política cuando cancela el cliente (100 % / 80 % / no permitido). Strategy de reembolso.
     private final PoliticaReembolso politicaCliente = new ReembolsoPorAnticipacion(config);
-    // Política cuando cancela el cine: siempre se devuelve el 100 % y no importa cuánto falte.
+    // Política cuando cancela el cine: siempre se devuelve el 100 %.
     private final PoliticaReembolso politicaCine = new ReembolsoFuncionCancelada(config);
-    // Observer: el servicio publica eventos sin saber quién los escucha. La bandeja guarda los avisos de cada cliente.
+    // Observer: el servicio publica eventos sin saber quién los escucha.
     private final PublicadorCine publicador = new PublicadorCine();
     private final BandejaNotificaciones bandeja = new BandejaNotificaciones();
 
@@ -83,14 +84,14 @@ public class CineServicio {
         cargarDatosIniciales();
     }
 
-        public Optional<Usuario> autenticar(String correo) {
+    public Optional<Usuario> autenticar(String correo) {
         if (correo == null) {
             return Optional.empty();
         }
         return Optional.ofNullable(usuarios.get(normalizar(correo)));
     }
 
-        public Cliente registrarCliente(String nombre, String correo) {
+    public Cliente registrarCliente(String nombre, String correo) {
         if (correo == null || !correo.contains("@")) {
             throw new CorreoInvalidoException();
         }
@@ -104,7 +105,7 @@ public class CineServicio {
         return cliente;
     }
 
-        public Tarjeta getTarjeta(Cliente cliente) {
+    public Tarjeta getTarjeta(Cliente cliente) {
         TarjetaVirtual real = tarjetas.get(cliente.getId());
         if (real == null) {
             throw new TarjetaNoEncontradaException();
@@ -116,7 +117,7 @@ public class CineServicio {
         return administrador;
     }
 
-        public List<Pelicula> getPeliculasEnCartelera() {
+    public List<Pelicula> getPeliculasEnCartelera() {
         return peliculas.stream()
                 .filter(p -> !getFuncionesDe(p).isEmpty())
                 .collect(Collectors.toList());
@@ -132,7 +133,7 @@ public class CineServicio {
                 .collect(Collectors.toList());
     }
 
-        public double precioEntrada(Funcion funcion, Asiento asiento) {
+    public double precioEntrada(Funcion funcion, Asiento asiento) {
         return crearEntradaSinReservar(funcion, asiento).getPrecio();
     }
 
@@ -148,30 +149,80 @@ public class CineServicio {
         return Collections.unmodifiableList(promociones);
     }
 
-        public Compra simularCompra(Cliente cliente, Funcion funcion, List<Asiento> asientos,
+    // Vista previa sin canje.
+    public Compra simularCompra(Cliente cliente, Funcion funcion, List<Asiento> asientos,
                                 List<Comprable> confiteria, List<Promocion> promocionesAplicadas) {
+        return simularCompra(cliente, funcion, asientos, confiteria, promocionesAplicadas,
+                new ArrayList<>(), new ArrayList<>());
+    }
+
+    // Vista previa con canje: no reserva asientos ni cobra nada.
+    public Compra simularCompra(Cliente cliente, Funcion funcion, List<Asiento> asientos,
+                                List<Comprable> confiteria, List<Promocion> promocionesAplicadas,
+                                List<Asiento> asientosCanjeados, List<Comprable> confiteriaCanjeada) {
         Compra.Builder builder = new Compra.Builder(config)
                 .cliente(cliente)
                 .funcion(funcion)
                 .combo(armarConfiteria(confiteria));
+        List<Entrada> entradas = new ArrayList<>();
         for (Asiento a : asientos) {
-            builder.entrada(crearEntradaSinReservar(funcion, a));
+            Entrada e = crearEntradaSinReservar(funcion, a);
+            entradas.add(e);
+            builder.entrada(e);
         }
         for (Promocion p : promocionesAplicadas) {
             builder.promocion(p);
         }
+        for (Asiento a : asientosCanjeados) {
+            for (Entrada e : entradas) {
+                if (e.getAsiento() == a) {
+                    builder.canjearEntrada(e);
+                }
+            }
+        }
+        for (Comprable item : confiteriaCanjeada) {
+            builder.canjearConfiteria(item);
+        }
         return builder.build();
     }
 
-        public Compra comprar(Cliente cliente, Funcion funcion, List<Asiento> asientos,
+    // Compra sin canje.
+    public Compra comprar(Cliente cliente, Funcion funcion, List<Asiento> asientos,
                           List<Comprable> confiteria, List<Promocion> promocionesAplicadas) {
+        return comprar(cliente, funcion, asientos, confiteria, promocionesAplicadas,
+                new ArrayList<>(), new ArrayList<>());
+    }
+
+    /*
+     Compra con canje de puntos. Los puntos se verifican ANTES de cobrar; después de pagar
+     se gastan (primero los lotes que vencen antes) y se acumulan los puntos de lo que
+     realmente se pagó.
+    */
+    public Compra comprar(Cliente cliente, Funcion funcion, List<Asiento> asientos,
+                          List<Comprable> confiteria, List<Promocion> promocionesAplicadas,
+                          List<Asiento> asientosCanjeados, List<Comprable> confiteriaCanjeada) {
         Compra compra = fachada.comprar(getTarjeta(cliente), funcion, asientos,
-                armarConfiteria(confiteria), promocionesAplicadas, 0);
+                armarConfiteria(confiteria), promocionesAplicadas,
+                asientosCanjeados, confiteriaCanjeada,
+                c -> {
+                    if (c.getPuntosRedimidos() > 0) {
+                        servicioPuntos.verificarDisponibles(cliente, c.getPuntosRedimidos());
+                    }
+                });
         compras.add(compra);
+
+        int puntosGastados = compra.getPuntosRedimidos();
+        if (puntosGastados > 0) {
+            servicioPuntos.redimir(cliente, compra.getId(), puntosGastados);
+        }
         servicioPuntos.confirmarCompra(compra);
-        publicador.publicar(new EventoCine(EventoCine.Tipo.COMPRA_PAGADA, cliente,
-                "Compra " + compra.getId() + " pagada por " + Formato.dinero(compra.getTotal())
-                        + " para " + descripcionFuncion(compra.getFuncion()) + "."));
+
+        String aviso = "Compra " + compra.getId() + " pagada por " + Formato.dinero(compra.getTotal())
+                + " para " + descripcionFuncion(compra.getFuncion()) + ".";
+        if (puntosGastados > 0) {
+            aviso += " Canjeaste " + puntosGastados + " puntos.";
+        }
+        publicador.publicar(new EventoCine(EventoCine.Tipo.COMPRA_PAGADA, cliente, aviso));
         return compra;
     }
 
@@ -182,11 +233,9 @@ public class CineServicio {
     }
 
     /*
-     Cancela una compra del cliente, devuelve el dinero a su tarjeta y le quita
-     los puntos que esa compra le había dado.
-     El estado de la compra (State) decide si se puede y cuánto devolver (Strategy);
-     aquí solo se mueve el dinero y se ajustan los puntos. Si la compra ya estaba
-     cancelada o reembolsada, compra.cancelar lanza excepción antes de tocar nada.
+     Cancela una compra del cliente, devuelve el dinero a su tarjeta, le devuelve los puntos
+     que gastó en esa compra y le quita los que esa compra le había dado (solo los no gastados).
+     El estado (State) decide si se puede y cuánto devolver (Strategy).
     */
     public double cancelarCompra(Cliente cliente, Compra compra) {
         if (!compra.getCliente().getId().equals(cliente.getId())) {
@@ -197,20 +246,22 @@ public class CineServicio {
             tarjetaDelSistema(cliente).reembolsar(monto, compra.getId());
         }
         if (compra.getEstado() == EstadoCompra.REEMBOLSADA) {
+            int devueltos = servicioPuntos.devolverPuntos(compra);
             servicioPuntos.revocarPuntos(compra);
-            publicador.publicar(new EventoCine(EventoCine.Tipo.COMPRA_REEMBOLSADA, cliente,
-                    "Compra " + compra.getId() + " cancelada: se devolvieron " + Formato.dinero(monto)
-                            + " a tu tarjeta."));
+            String aviso = "Compra " + compra.getId() + " cancelada: se devolvieron "
+                    + Formato.dinero(monto) + " a tu tarjeta.";
+            if (devueltos > 0) {
+                aviso += " También recuperaste " + devueltos + " puntos.";
+            }
+            publicador.publicar(new EventoCine(EventoCine.Tipo.COMPRA_REEMBOLSADA, cliente, aviso));
         }
         return monto;
     }
 
     /*
-     El cine cancela una función: solo el administrador puede hacerlo. Cada compra pagada
-     de esa función se reembolsa al 100 % a la tarjeta que pagó, se libera su asiento y se
-     le quitan al cliente los puntos que esa compra le había dado. Devuelve cuántas compras
-     se reembolsaron.
-     Es el mismo recorrido que cancelarCompra; lo único que cambia es la política (Strategy).
+     El cine cancela una función: solo el administrador. Cada compra pagada de esa función
+     se reembolsa al 100 %, se libera su asiento, se devuelven los puntos gastados y se
+     quitan los ganados. Devuelve cuántas compras se reembolsaron.
     */
     public int cancelarFuncion(Usuario actor, Funcion funcion) {
         if (!actor.esAdministrador()) {
@@ -222,7 +273,6 @@ public class CineServicio {
         if (funcion.estaCancelada()) {
             throw new EstadoInvalidoException("La función ya está cancelada");
         }
-        // Primero se cierra la función, así nadie compra mientras se reembolsa a los demás.
         funcion.cancelar();
 
         LocalDateTime ahora = LocalDateTime.now();
@@ -235,18 +285,23 @@ public class CineServicio {
             if (monto > 0) {
                 tarjetaDelSistema(compra.getCliente()).reembolsar(monto, compra.getId());
             }
+            int devueltos = servicioPuntos.devolverPuntos(compra);
             servicioPuntos.revocarPuntos(compra);
-            publicador.publicar(new EventoCine(EventoCine.Tipo.FUNCION_CANCELADA, compra.getCliente(),
-                    "El cine canceló " + descripcionFuncion(funcion) + ". Tu compra " + compra.getId()
-                            + " fue reembolsada: " + Formato.dinero(monto) + " de vuelta en tu tarjeta."));
+            String aviso = "El cine canceló " + descripcionFuncion(funcion) + ". Tu compra "
+                    + compra.getId() + " fue reembolsada: " + Formato.dinero(monto)
+                    + " de vuelta en tu tarjeta.";
+            if (devueltos > 0) {
+                aviso += " También recuperaste " + devueltos + " puntos.";
+            }
+            publicador.publicar(new EventoCine(EventoCine.Tipo.FUNCION_CANCELADA,
+                    compra.getCliente(), aviso));
             reembolsadas++;
         }
         return reembolsadas;
     }
 
     /*
-     Recarga la tarjeta de un cliente. Quien exige que sea administrador es el Proxy de la tarjeta,
-     así que si el actor no lo es, lanza excepción y no se publica nada.
+     Recarga la tarjeta de un cliente. Quien exige que sea administrador es el Proxy de la tarjeta.
     */
     public void recargarTarjeta(Usuario actor, Cliente cliente, double monto) {
         TarjetaVirtual real = tarjetas.get(cliente.getId());
@@ -258,12 +313,10 @@ public class CineServicio {
                 "Tu tarjeta fue recargada con " + Formato.dinero(monto) + "."));
     }
 
-    // Las notificaciones del cliente, las más recientes primero.
     public List<EventoCine> getNotificaciones(Cliente cliente) {
         return bandeja.getNotificaciones(cliente);
     }
 
-    // Para agregar otro canal de aviso (bitácora, correo simulado...) sin tocar el resto del servicio.
     public void registrarObservador(ObservadorCine observador) {
         publicador.registrar(observador);
     }
@@ -280,15 +333,27 @@ public class CineServicio {
         return servicioPuntos.getPuntosVigentes(cliente);
     }
 
+    public int getPuntosRedimidos(Cliente cliente) {
+        return servicioPuntos.getPuntosRedimidos(cliente);
+    }
+
     public List<PuntosAcumulados> getHistorialPuntos(Cliente cliente) {
         return servicioPuntos.getHistorial(cliente);
+    }
+
+    public List<ConsumoPuntos> getHistorialConsumos(Cliente cliente) {
+        return servicioPuntos.getHistorialConsumos(cliente);
+    }
+
+    public int getRestantes(Cliente cliente, PuntosAcumulados lote) {
+        return servicioPuntos.getRestantes(cliente, lote);
     }
 
     public ConfiguracionCine getConfig() {
         return config;
     }
 
-        // Compra admite un solo Combo: se agrupa todo en un combo contenedor sin descuento.
+    // Compra admite un solo Combo: se agrupa todo en un combo contenedor sin descuento.
     private Combo armarConfiteria(List<Comprable> items) {
         if (items == null || items.isEmpty()) {
             return null;
@@ -391,7 +456,7 @@ public class CineServicio {
         funciones.add(new Funcion(id, pelicula, sala, fechaHora, precioBase));
     }
 
-        private void ocuparAsientosDeEjemplo() {
+    private void ocuparAsientosDeEjemplo() {
         Random azar = new Random(7);
         for (Funcion f : funciones) {
             for (Asiento a : f.getSala().getAsientos()) {
