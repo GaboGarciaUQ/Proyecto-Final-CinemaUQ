@@ -1,4 +1,4 @@
-package com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy;
+package com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos;
 
 /*
  ConcreteStrategy: la compra no acumula puntos (por ejemplo, cuando la acumulación está suspendida).

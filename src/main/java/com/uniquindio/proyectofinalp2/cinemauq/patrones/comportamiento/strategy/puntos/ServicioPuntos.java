@@ -1,4 +1,4 @@
-package com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy;
+package com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
