@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.AccesoDenegadoException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CorreoInvalidoException;
+import com.uniquindio.proyectofinalp2.cinemauq.excepcion.EstadoInvalidoException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.TarjetaNoEncontradaException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.UsuarioDuplicadoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
@@ -33,6 +34,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Entrada;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EntradaAccesible;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EntradaGeneral;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.EstadoCompra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Promocion;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory2D;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.abstractfactory.SalaFactory3D;
@@ -42,6 +44,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.PuntosBase;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos.ServicioPuntos;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.PoliticaReembolso;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.ReembolsoFuncionCancelada;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.ReembolsoPorAnticipacion;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
@@ -53,6 +56,8 @@ public class CineServicio {
     private final ServicioPuntos servicioPuntos = new ServicioPuntos(config, new PuntosBase(config));
     // Política cuando cancela el cliente (100 % / 80 % / no permitido). Strategy de reembolso.
     private final PoliticaReembolso politicaCliente = new ReembolsoPorAnticipacion(config);
+    // Política cuando cancela el cine: siempre se devuelve el 100 % y no importa cuánto falte.
+    private final PoliticaReembolso politicaCine = new ReembolsoFuncionCancelada(config);
 
     private final Administrador administrador = new Administrador("A1", "Carlos Ruiz", "admin@cinemauq.com");
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
@@ -165,10 +170,11 @@ public class CineServicio {
     }
 
     /*
-     Cancela una compra del cliente y devuelve el dinero a su tarjeta.
+     Cancela una compra del cliente, devuelve el dinero a su tarjeta y le quita
+     los puntos que esa compra le había dado.
      El estado de la compra (State) decide si se puede y cuánto devolver (Strategy);
-     aquí solo se mueve el dinero. Si la compra ya estaba cancelada o reembolsada,
-     compra.cancelar lanza excepción antes de tocar la tarjeta.
+     aquí solo se mueve el dinero y se ajustan los puntos. Si la compra ya estaba
+     cancelada o reembolsada, compra.cancelar lanza excepción antes de tocar nada.
     */
     public double cancelarCompra(Cliente cliente, Compra compra) {
         if (!compra.getCliente().getId().equals(cliente.getId())) {
@@ -178,7 +184,46 @@ public class CineServicio {
         if (monto > 0) {
             tarjetaDelSistema(cliente).reembolsar(monto, compra.getId());
         }
+        if (compra.getEstado() == EstadoCompra.REEMBOLSADA) {
+            servicioPuntos.revocarPuntos(compra);
+        }
         return monto;
+    }
+
+    /*
+     El cine cancela una función: solo el administrador puede hacerlo. Cada compra pagada
+     de esa función se reembolsa al 100 % a la tarjeta que pagó, se libera su asiento y se
+     le quitan al cliente los puntos que esa compra le había dado. Devuelve cuántas compras
+     se reembolsaron.
+     Es el mismo recorrido que cancelarCompra; lo único que cambia es la política (Strategy).
+    */
+    public int cancelarFuncion(Usuario actor, Funcion funcion) {
+        if (!actor.esAdministrador()) {
+            throw new AccesoDenegadoException(actor.getNombre(), "cancelar una función");
+        }
+        if (!funciones.contains(funcion)) {
+            throw new IllegalArgumentException("La función no pertenece a la cartelera del cine");
+        }
+        if (funcion.estaCancelada()) {
+            throw new EstadoInvalidoException("La función ya está cancelada");
+        }
+        // Primero se cierra la función, así nadie compra mientras se reembolsa a los demás.
+        funcion.cancelar();
+
+        LocalDateTime ahora = LocalDateTime.now();
+        int reembolsadas = 0;
+        for (Compra compra : compras) {
+            if (compra.getFuncion() != funcion || compra.getEstado() != EstadoCompra.PAGADA) {
+                continue;
+            }
+            double monto = compra.cancelar(politicaCine, ahora);
+            if (monto > 0) {
+                tarjetaDelSistema(compra.getCliente()).reembolsar(monto, compra.getId());
+            }
+            servicioPuntos.revocarPuntos(compra);
+            reembolsadas++;
+        }
+        return reembolsadas;
     }
 
     public int puntosPorCompra(double total) {

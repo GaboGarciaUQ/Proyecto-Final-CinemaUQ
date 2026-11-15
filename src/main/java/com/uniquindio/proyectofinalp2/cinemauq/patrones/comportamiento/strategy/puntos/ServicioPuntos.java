@@ -76,6 +76,30 @@ public class ServicioPuntos {
         return registro;
     }
 
+    /*
+     Quita los puntos que otorgó una compra que fue reembolsada: si el dinero
+     volvió, los puntos ganados con ese dinero también. Devuelve cuántos puntos
+     se quitaron (0 si la compra no había otorgado puntos). Llamarlo dos veces
+     es inofensivo: la segunda vez ya no hay nada que quitar.
+    */
+    public int revocarPuntos(Compra compra) {
+        Objects.requireNonNull(compra, "La compra es obligatoria");
+        if (compra.getEstado() != EstadoCompra.REEMBOLSADA) {
+            throw new EstadoInvalidoException(
+                    "Solo se revocan los puntos de una compra reembolsada (estado: " + compra.getEstado() + ")");
+        }
+        List<PuntosAcumulados> cuenta = cuentas.get(compra.getCliente().getId());
+        if (cuenta == null) {
+            return 0;
+        }
+        int revocados = cuenta.stream()
+                .filter(p -> p.getIdCompra().equals(compra.getId()))
+                .mapToInt(PuntosAcumulados::getPuntos)
+                .sum();
+        cuenta.removeIf(p -> p.getIdCompra().equals(compra.getId()));
+        return revocados;
+    }
+
     public List<PuntosAcumulados> getHistorial(Cliente cliente) {
         return Collections.unmodifiableList(
                 cuentas.getOrDefault(cliente.getId(), Collections.<PuntosAcumulados>emptyList()));
