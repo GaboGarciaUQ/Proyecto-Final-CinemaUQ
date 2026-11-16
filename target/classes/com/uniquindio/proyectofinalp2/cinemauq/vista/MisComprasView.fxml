@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.MisComprasController">
+    <top>
+        <fx:include source="BarraSuperiorView.fxml"/>
+    </top>
+    <center>
+        <VBox spacing="18" style="-fx-padding: 28 40 40 40;">
+            <VBox spacing="4">
+                <Label text="Mis compras" styleClass="titulo"/>
+                <Label text="Selecciona una compra para ver el detalle o cancelarla." styleClass="subtitulo"/>
+            </VBox>
+            <HBox spacing="24" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblCompras" HBox.hgrow="ALWAYS"/>
+                <VBox styleClass="panel" spacing="12" prefWidth="340" minWidth="340">
+                    <Label text="Detalle" styleClass="titulo-seccion"/>
+                    <Label fx:id="lblDetalle" wrapText="true" styleClass="texto-suave"/>
+                    <Button fx:id="btnCancelar" text="Cancelar compra" styleClass="boton-secundario"
+                            maxWidth="Infinity" disable="true" onAction="#cancelar"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

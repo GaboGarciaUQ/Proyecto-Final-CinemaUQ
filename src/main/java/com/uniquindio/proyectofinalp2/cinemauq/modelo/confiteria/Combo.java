@@ -19,7 +19,7 @@ public class Combo implements Comprable {
         if (componentes.isEmpty()) {
             throw new IllegalArgumentException("Un combo necesita al menos un componente");
         }
-        if (porcentajeDescuento < 0 || porcentajeDescuento > 1) {
+        if (porcentajeDescuento < 0 || porcentajeDescuento >= 1) {
             throw new IllegalArgumentException("El descuento debe estar entre 0 y 1");
         }
         this.componentes = List.copyOf(componentes);

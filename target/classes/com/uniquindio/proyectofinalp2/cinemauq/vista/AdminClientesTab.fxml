@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.AdminClientesController" spacing="24" style="-fx-padding: 24 32 32 32;">
+    <VBox spacing="12" HBox.hgrow="ALWAYS">
+        <Label text="Clientes" styleClass="titulo"/>
+        <TextField fx:id="txtBuscar" promptText="Buscar por nombre o correo" onKeyReleased="#buscar"/>
+        <TableView fx:id="tblClientes" VBox.vgrow="ALWAYS"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="txtRecarga" promptText="Monto a recargar" prefWidth="150"/>
+            <Button text="Recargar tarjeta" styleClass="boton-primario" onAction="#recargar"/>
+            <Button text="Bloquear / activar" styleClass="boton-secundario" onAction="#alternarTarjeta"/>
+            <Button text="Ver compras" styleClass="boton-secundario" onAction="#verCompras"/>
+        </HBox>
+    </VBox>
+    <VBox spacing="12" prefWidth="420" minWidth="420">
+        <Label text="Solicitudes de recarga" styleClass="titulo"/>
+        <TableView fx:id="tblSolicitudes" VBox.vgrow="ALWAYS"/>
+        <HBox spacing="10">
+            <Button text="Aprobar" styleClass="boton-primario" onAction="#aprobar"/>
+            <Button text="Rechazar" styleClass="boton-secundario" onAction="#rechazar"/>
+        </HBox>
+    </VBox>
+</HBox>
