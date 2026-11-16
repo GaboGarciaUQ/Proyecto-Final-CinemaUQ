@@ -25,8 +25,10 @@ import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Sala;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Comprable;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Producto;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Movimiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Tarjeta;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.TarjetaVirtual;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.reportes.CalcularEstadisticas;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Administrador;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Usuario;
@@ -72,16 +74,23 @@ public class CineServicio {
     private final Map<String, Usuario> usuarios = new LinkedHashMap<>();
     private final Map<String, TarjetaVirtual> tarjetas = new HashMap<>();
     private final List<Pelicula> peliculas = new ArrayList<>();
+    private final List<Sala> salas = new ArrayList<>();
     private final List<Funcion> funciones = new ArrayList<>();
     private final List<Producto> productos = new ArrayList<>();
     private final List<Combo> combos = new ArrayList<>();
     private final List<Promocion> promociones = new ArrayList<>();
     private final List<Compra> compras = new ArrayList<>();
+    private final ServicioAdministracion administracion;
+    private final ServicioSolicitudesRecarga solicitudesRecarga;
     private int consecutivoCliente = 0;
 
     public CineServicio() {
         publicador.registrar(bandeja);
         cargarDatosIniciales();
+        // Se crea después de cargar los datos para que sus consecutivos partan de lo ya existente.
+        administracion = new ServicioAdministracion(peliculas, salas, funciones, productos,
+                combos, promociones, compras, usuarios, config);
+        solicitudesRecarga = new ServicioSolicitudesRecarga(this);
     }
 
     public Optional<Usuario> autenticar(String correo) {
@@ -115,6 +124,25 @@ public class CineServicio {
 
     public Administrador getAdministrador() {
         return administrador;
+    }
+
+    // Gestión del catálogo y consulta de clientes (solo administrador).
+    public ServicioAdministracion getAdministracion() {
+        return administracion;
+    }
+
+    // El cliente solicita recargas; el administrador las aprueba o rechaza.
+    public ServicioSolicitudesRecarga getSolicitudesRecarga() {
+        return solicitudesRecarga;
+    }
+
+    // Todas las películas, tengan o no funciones programadas.
+    public List<Pelicula> getPeliculas() {
+        return Collections.unmodifiableList(peliculas);
+    }
+
+    public List<Sala> getSalas() {
+        return Collections.unmodifiableList(salas);
     }
 
     public List<Pelicula> getPeliculasEnCartelera() {
@@ -232,6 +260,34 @@ public class CineServicio {
                 .collect(Collectors.toList());
     }
 
+    // Todas las compras del cine (para reportes y estadísticas).
+    public List<Compra> getCompras() {
+        return Collections.unmodifiableList(compras);
+    }
+
+    // Todas las funciones, incluidas las canceladas y las pasadas (para reportes y estadísticas).
+    public List<Funcion> getFunciones() {
+        return Collections.unmodifiableList(funciones);
+    }
+
+    // Estadísticas con los datos de este momento.
+    public CalcularEstadisticas getEstadisticas() {
+        Map<Cliente, List<Movimiento>> movimientos = new LinkedHashMap<>();
+        List<Cliente> clientes = new ArrayList<>();
+        for (Usuario usuario : usuarios.values()) {
+            if (usuario instanceof Cliente) {
+                Cliente cliente = (Cliente) usuario;
+                clientes.add(cliente);
+                TarjetaVirtual tarjeta = tarjetas.get(cliente.getId());
+                if (tarjeta != null) {
+                    movimientos.put(cliente, new ArrayList<>(tarjeta.getMovimientos()));
+                }
+            }
+        }
+        // Con movimientos, clientes y puntos: sin ellos los reportes de recargas y puntos salen vacíos.
+        return new CalcularEstadisticas(compras, funciones, movimientos, clientes, servicioPuntos);
+    }
+
     /*
      Cancela una compra del cliente, devuelve el dinero a su tarjeta, le devuelve los puntos
      que gastó en esa compra y le quita los que esa compra le había dado (solo los no gastados).
@@ -311,6 +367,24 @@ public class CineServicio {
         new TarjetaProxy(real, actor).recargar(monto);
         publicador.publicar(new EventoCine(EventoCine.Tipo.TARJETA_RECARGADA, cliente,
                 "Tu tarjeta fue recargada con " + Formato.dinero(monto) + "."));
+    }
+
+    // Tarjeta de un cliente vista por un actor: el Proxy decide si puede (titular o administrador).
+    public Tarjeta getTarjetaDe(Usuario actor, Cliente cliente) {
+        TarjetaVirtual real = tarjetas.get(cliente.getId());
+        if (real == null) {
+            throw new TarjetaNoEncontradaException();
+        }
+        return new TarjetaProxy(real, actor);
+    }
+
+    // Solo el administrador puede bloquear una tarjeta: lo exige el Proxy.
+    public void desactivarTarjeta(Usuario actor, Cliente cliente) {
+        getTarjetaDe(actor, cliente).desactivar();
+    }
+
+    public void activarTarjeta(Usuario actor, Cliente cliente) {
+        getTarjetaDe(actor, cliente).activar();
     }
 
     public List<EventoCine> getNotificaciones(Cliente cliente) {
@@ -395,6 +469,9 @@ public class CineServicio {
         Sala sala1 = new SalaFactory2D().crearSala("S1", "Sala 1");
         Sala sala2 = new SalaFactory3D().crearSala("S2", "Sala 2");
         Sala sala3 = new SalaFactory4DX().crearSala("S3", "Sala 3");
+        salas.add(sala1);
+        salas.add(sala2);
+        salas.add(sala3);
 
         Pelicula interestelar = new Pelicula("P1", "Interestelar", 169);
         Pelicula avatar = new Pelicula("P2", "Avatar: El camino del agua", 192);

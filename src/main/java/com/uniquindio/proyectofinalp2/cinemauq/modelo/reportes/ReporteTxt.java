@@ -31,7 +31,7 @@ public class ReporteTxt extends ReporteBase {
             sb.append(fila).append("\n");
         }
         sb.append("------------------------------\n");
-        sb.append("Total: ").append(total).append("\n");
+        sb.append("Total: ").append(textoTotal()).append("\n");
         Files.writeString(destino, sb.toString(), StandardCharsets.UTF_8);
     }
 }

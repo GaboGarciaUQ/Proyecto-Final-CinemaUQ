@@ -12,8 +12,8 @@ public class Funcion implements Prototipo<Funcion> {
     private final String id;
     private final Pelicula pelicula;
     private final Sala sala;
-    private final LocalDateTime fechaHora;
-    private final double precioBase;
+    private LocalDateTime fechaHora;
+    private double precioBase;
     private final List<Asiento> ocupados = new ArrayList<>();
     private boolean cancelada;
 
@@ -42,6 +42,20 @@ public class Funcion implements Prototipo<Funcion> {
 
     public void cancelar() {
         cancelada = true;
+    }
+
+    public void reprogramar(LocalDateTime nuevaFechaHora) {
+        if (nuevaFechaHora == null) {
+            throw new IllegalArgumentException("La fecha y hora son obligatorias");
+        }
+        fechaHora = nuevaFechaHora;
+    }
+
+    public void cambiarPrecioBase(double nuevoPrecio) {
+        if (nuevoPrecio <= 0) {
+            throw new IllegalArgumentException("El precio base debe ser mayor a cero");
+        }
+        precioBase = nuevoPrecio;
     }
 
     public double getPrecioFinal() {

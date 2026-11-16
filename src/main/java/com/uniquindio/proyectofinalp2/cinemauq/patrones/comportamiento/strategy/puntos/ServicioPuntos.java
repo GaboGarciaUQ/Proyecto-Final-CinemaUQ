@@ -1,5 +1,6 @@
 package com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.puntos;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +36,8 @@ public class ServicioPuntos {
     private final Map<String, List<ConsumoPuntos>> consumos = new HashMap<>();
     private final Set<String> comprasConfirmadas = new HashSet<>();
     private EstrategiaPuntos estrategia;
+    // Reloj del servicio: en producción es el del sistema; las pruebas lo adelantan para verificar vencimientos.
+    private Clock reloj = Clock.systemDefaultZone();
 
     public ServicioPuntos(ConfiguracionCine config, EstrategiaPuntos estrategiaInicial) {
         this.config = Objects.requireNonNull(config, "La configuración es obligatoria");
@@ -44,6 +47,10 @@ public class ServicioPuntos {
     /* Cambio de política en tiempo de ejecución. */
     public void setEstrategia(EstrategiaPuntos estrategia) {
         this.estrategia = Objects.requireNonNull(estrategia, "La estrategia es obligatoria");
+    }
+
+    public void setReloj(Clock reloj) {
+        this.reloj = Objects.requireNonNull(reloj, "El reloj es obligatorio");
     }
 
     public EstrategiaPuntos getEstrategia() {
@@ -76,7 +83,7 @@ public class ServicioPuntos {
         if (puntos == 0) {
             return null;
         }
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = LocalDate.now(reloj);
         PuntosAcumulados registro = new PuntosAcumulados(compra.getId(), puntos, hoy,
                 hoy.plusYears(config.getVigenciaPuntosAnios()), estrategia.getNombre());
         cuentas.computeIfAbsent(compra.getCliente().getId(), k -> new ArrayList<>()).add(registro);
@@ -110,7 +117,7 @@ public class ServicioPuntos {
         }
         verificarDisponibles(cliente, puntos);
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = LocalDate.now(reloj);
         List<PuntosAcumulados> lotes = new ArrayList<>(getHistorial(cliente));
         lotes.sort(Comparator.comparing(PuntosAcumulados::getFechaVencimiento)
                 .thenComparing(PuntosAcumulados::getFechaObtencion));
@@ -213,7 +220,7 @@ public class ServicioPuntos {
 
     /* Puntos que el cliente puede gastar hoy: lotes vigentes, descontando lo ya canjeado. */
     public int getPuntosVigentes(Cliente cliente) {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = LocalDate.now(reloj);
         int total = 0;
         for (PuntosAcumulados p : getHistorial(cliente)) {
             if (p.estaVigente(hoy)) {

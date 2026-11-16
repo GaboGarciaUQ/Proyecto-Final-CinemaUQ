@@ -87,7 +87,7 @@ public class ReportePdf extends ReporteBase {
             lineas.add(fila);
         }
         lineas.add("------------------------------");
-        lineas.add("Total: " + total);
+        lineas.add("Total: " + textoTotal());
         return lineas;
     }
 

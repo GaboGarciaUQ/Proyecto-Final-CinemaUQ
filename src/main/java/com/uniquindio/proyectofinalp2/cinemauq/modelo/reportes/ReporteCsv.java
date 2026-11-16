@@ -30,7 +30,7 @@ public class ReporteCsv extends ReporteBase {
         for (String fila : filas) {
             sb.append(campo(fila)).append("\n");
         }
-        sb.append("Total,").append(total).append("\n");
+        sb.append("Total,").append(textoTotalPlano()).append("\n");
         Files.writeString(destino, sb.toString(), StandardCharsets.UTF_8);
     }
 

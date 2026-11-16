@@ -56,6 +56,14 @@ public final class ConfiguracionCine {
         return (int) (valorGastado / valorPorBloque) * puntosPorBloque;
     }
 
+    public double getValorPorBloque() {
+        return valorPorBloque;
+    }
+
+    public int getPuntosPorBloque() {
+        return puntosPorBloque;
+    }
+
     public int getVigenciaPuntosAnios() {
         return VIGENCIA_PUNTOS_ANIOS;
     }
