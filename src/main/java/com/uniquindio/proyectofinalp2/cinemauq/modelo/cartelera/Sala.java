@@ -3,6 +3,7 @@ package com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class Sala {
 
@@ -40,6 +41,15 @@ public class Sala {
 
     public List<Asiento> getAsientos() {
         return Collections.unmodifiableList(asientos);
+    }
+
+    public Optional<Asiento> getAsiento(char fila, int numero) {
+        for (Asiento a : asientos) {
+            if (a.getFila() == fila && a.getNumero() == numero) {
+                return Optional.of(a);
+            }
+        }
+        return Optional.empty();
     }
 
     public int getCapacidad() {

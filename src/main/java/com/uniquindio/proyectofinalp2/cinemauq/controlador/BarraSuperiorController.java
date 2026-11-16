@@ -35,6 +35,24 @@ public class BarraSuperiorController {
     }
 
     @FXML
+    private void irATarjeta() {
+        sesion.limpiarCompra();
+        Navegador.ir(Vista.MI_TARJETA);
+    }
+
+    @FXML
+    private void irACompras() {
+        sesion.limpiarCompra();
+        Navegador.ir(Vista.MIS_COMPRAS);
+    }
+
+    @FXML
+    private void irAPuntos() {
+        sesion.limpiarCompra();
+        Navegador.ir(Vista.PUNTOS);
+    }
+
+    @FXML
     private void salir() {
         sesion.cerrarSesion();
         Navegador.ir(Vista.LOGIN);

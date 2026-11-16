@@ -1,6 +1,9 @@
 package com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton;
 
 import java.time.Duration;
+import java.util.Objects;
+
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.TipoBeneficio;
 
 /*
  PATRÓN CREACIONAL: SINGLETON (Initialization-on-demand holder).
@@ -12,13 +15,12 @@ public final class ConfiguracionCine {
     private static final double VALOR_POR_BLOQUE_DEFECTO = 1000.0;
     private static final int PUNTOS_POR_BLOQUE_DEFECTO = 1;
     private static final int VIGENCIA_PUNTOS_ANIOS = 1;
-    
+
     private static final int PUNTOS_PARA_ENTRADA_DEFECTO = 100;
     private static final int PUNTOS_PARA_PRODUCTO_DEFECTO = 30;
     private static final int PUNTOS_PARA_COMBO_DEFECTO = 60;
 
     private static final double IVA_DEFECTO = 0.19;
-    private static final double VALOR_PUNTO_DEFECTO = 10.0; // pesos por punto redimido
 
     /*Política de reembolso*/
     private static final Duration LIMITE_REEMBOLSO_TOTAL = Duration.ofHours(24);
@@ -54,8 +56,31 @@ public final class ConfiguracionCine {
         return (int) (valorGastado / valorPorBloque) * puntosPorBloque;
     }
 
+    public double getValorPorBloque() {
+        return valorPorBloque;
+    }
+
+    public int getPuntosPorBloque() {
+        return puntosPorBloque;
+    }
+
     public int getVigenciaPuntosAnios() {
         return VIGENCIA_PUNTOS_ANIOS;
+    }
+
+    /* Puntos que cuesta canjear un beneficio de ese tipo (tabla de equivalencias). */
+    public int getPuntosPara(TipoBeneficio tipo) {
+        Objects.requireNonNull(tipo, "El tipo de beneficio es obligatorio");
+        switch (tipo) {
+            case ENTRADA:
+                return puntosParaEntrada;
+            case PRODUCTO:
+                return puntosParaProducto;
+            case COMBO:
+                return puntosParaCombo;
+            default:
+                throw new IllegalArgumentException("Tipo de beneficio sin equivalencia: " + tipo);
+        }
     }
 
     public int getPuntosParaEntrada() {
@@ -68,10 +93,6 @@ public final class ConfiguracionCine {
 
     public int getPuntosParaCombo() {
         return puntosParaCombo;
-    }
-
-    public double getValorPunto() {
-        return VALOR_PUNTO_DEFECTO;
     }
 
     /*Impuestos*/

@@ -37,7 +37,7 @@ public class ReporteHtmlAdapter extends ReporteBase {
         }
         exportador.cerrarTabla();
 
-        exportador.agregarParrafo("Total: " + total);
+        exportador.agregarParrafo("Total: " + textoTotal());
         exportador.guardarEnArchivo(destino.toString());
     }
 }

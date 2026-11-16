@@ -5,7 +5,11 @@ public enum Vista {
     CARTELERA("CarteleraView.fxml"),
     ASIENTOS("AsientosView.fxml"),
     CONFITERIA("ConfiteriaView.fxml"),
-    COMPRA("CompraView.fxml");
+    COMPRA("CompraView.fxml"),
+    MI_TARJETA("MiTarjetaView.fxml"),
+    MIS_COMPRAS("MisComprasView.fxml"),
+    PUNTOS("PuntosView.fxml"),
+    ADMIN("AdminView.fxml");
 
     private final String archivo;
 

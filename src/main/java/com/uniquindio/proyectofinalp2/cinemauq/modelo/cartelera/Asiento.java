@@ -29,6 +29,13 @@ public class Asiento {
         return tipo;
     }
 
+    public void cambiarTipo(TipoAsiento nuevoTipo) {
+        if (nuevoTipo == null) {
+            throw new IllegalArgumentException("El tipo de asiento es obligatorio");
+        }
+        tipo = nuevoTipo;
+    }
+
     public boolean esAccesible() {
         return tipo == TipoAsiento.ACCESIBLE;
     }

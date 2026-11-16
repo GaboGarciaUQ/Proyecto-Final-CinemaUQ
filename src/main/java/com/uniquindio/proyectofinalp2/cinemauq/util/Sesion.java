@@ -7,6 +7,7 @@ import java.util.List;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Comprable;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Administrador;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.servicio.CineServicio;
 
@@ -16,6 +17,7 @@ public final class Sesion {
     private final List<Asiento> asientos = new ArrayList<>();
     private final List<Comprable> confiteria = new ArrayList<>();
     private Cliente cliente;
+    private Administrador admin;
     private Funcion funcion;
 
     private Sesion() {
@@ -42,8 +44,19 @@ public final class Sesion {
         limpiarCompra();
     }
 
+    public Administrador getAdmin() {
+        return admin;
+    }
+
+    public void iniciarAdmin(Administrador admin) {
+        this.cliente = null;
+        this.admin = admin;
+        limpiarCompra();
+    }
+
     public void cerrarSesion() {
         cliente = null;
+        admin = null;
         limpiarCompra();
     }
 

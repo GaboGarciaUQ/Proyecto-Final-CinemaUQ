@@ -9,6 +9,10 @@
       fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.BarraSuperiorController"
       styleClass="barra-superior" alignment="CENTER_LEFT" spacing="20">
     <Label text="CinemaUQ" styleClass="logo" style="-fx-cursor: hand;" onMouseClicked="#irACartelera"/>
+    <Button text="Cartelera" styleClass="boton-texto" onAction="#irACartelera"/>
+    <Button text="Mi tarjeta" styleClass="boton-texto" onAction="#irATarjeta"/>
+    <Button text="Mis compras" styleClass="boton-texto" onAction="#irACompras"/>
+    <Button text="Puntos" styleClass="boton-texto" onAction="#irAPuntos"/>
     <Region HBox.hgrow="ALWAYS"/>
     <Label fx:id="lblNombre" styleClass="texto-suave"/>
     <Label fx:id="lblSaldo" styleClass="precio"/>

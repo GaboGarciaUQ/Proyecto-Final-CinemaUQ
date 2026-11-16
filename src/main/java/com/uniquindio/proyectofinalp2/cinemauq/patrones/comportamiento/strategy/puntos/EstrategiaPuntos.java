@@ -2,7 +2,7 @@ package com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy
 
 /*
  PATRÓN COMPORTAMENTAL: STRATEGY.
- Strategy (interfaz): contrato común de todas las políticas de acumulación de puntos CinemaUQ.
+ Strategy (interfaz): contrato comun de todas las políticas de acumulación de puntos CinemaUQ.
  Cada política encapsula una fórmula distinta e intercambiable.
 */
 public interface EstrategiaPuntos {

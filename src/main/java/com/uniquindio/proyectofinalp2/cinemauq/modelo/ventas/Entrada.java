@@ -25,14 +25,14 @@ public abstract class Entrada {
         this.funcion = Objects.requireNonNull(funcion, "La función es obligatoria");
         this.asiento = Objects.requireNonNull(asiento, "El asiento es obligatorio");
         this.numero = UUID.randomUUID().toString();
-        // Se llama después de asignar funcion y asiento, que son lo único
+        // Se llama después de asignar funcion y asiento, que son lo unico
         // que calcularPrecio() puede usar en las subclases.
         this.precio = calcularPrecio();
         this.estado = EstadoEntrada.VIGENTE;
     }
 
     
-    /*Precio de esta entrada según su tipo.
+    /*Precio de esta entrada segun su tipo.
     Las subclases deben usar solo getFuncion() y getAsiento(), no sus propios
     atributos (todavía no están inicializados cuando el constructor lo llama).
     */

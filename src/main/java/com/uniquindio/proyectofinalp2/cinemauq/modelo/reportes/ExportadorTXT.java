@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ReporteTxt extends ReporteBase {
+public class ExportadorTXT extends ReporteBase {
 
-    public ReporteTxt(String titulo, LocalDateTime generado, String periodo,
+    public ExportadorTXT(String titulo, LocalDateTime generado, String periodo,
                       List<String> filas, double total) {
         super(titulo, generado, periodo, filas, total);
     }
@@ -31,7 +31,7 @@ public class ReporteTxt extends ReporteBase {
             sb.append(fila).append("\n");
         }
         sb.append("------------------------------\n");
-        sb.append("Total: ").append(total).append("\n");
+        sb.append("Total: ").append(textoTotal()).append("\n");
         Files.writeString(destino, sb.toString(), StandardCharsets.UTF_8);
     }
 }

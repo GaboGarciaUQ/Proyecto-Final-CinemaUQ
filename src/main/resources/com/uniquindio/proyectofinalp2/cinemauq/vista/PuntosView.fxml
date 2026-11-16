@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.PuntosController">
+    <top>
+        <fx:include source="BarraSuperiorView.fxml"/>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <VBox spacing="22" style="-fx-padding: 28 40 40 40;">
+                <VBox spacing="4">
+                    <Label text="Mis puntos CinemaUQ" styleClass="titulo"/>
+                    <Label fx:id="lblRegla" styleClass="subtitulo" wrapText="true"/>
+                </VBox>
+                <HBox spacing="24">
+                    <VBox styleClass="panel" spacing="6" prefWidth="260">
+                        <Label text="Puntos vigentes" styleClass="etiqueta-campo"/>
+                        <Label fx:id="lblVigentes" styleClass="total"/>
+                    </VBox>
+                    <VBox styleClass="panel" spacing="6" prefWidth="260">
+                        <Label text="Puntos redimidos" styleClass="etiqueta-campo"/>
+                        <Label fx:id="lblRedimidos" styleClass="total"/>
+                    </VBox>
+                    <VBox styleClass="panel" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Equivalencias para redimir" styleClass="etiqueta-campo"/>
+                        <Label fx:id="lblEquivalencias" wrapText="true"/>
+                    </VBox>
+                </HBox>
+                <VBox styleClass="panel" spacing="10">
+                    <Label text="Puntos obtenidos" styleClass="titulo-seccion"/>
+                    <TableView fx:id="tblLotes" prefHeight="220"/>
+                </VBox>
+                <VBox styleClass="panel" spacing="10">
+                    <Label text="Puntos usados" styleClass="titulo-seccion"/>
+                    <TableView fx:id="tblConsumos" prefHeight="200"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

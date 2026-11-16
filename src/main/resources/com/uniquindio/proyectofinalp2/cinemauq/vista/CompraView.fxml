@@ -35,7 +35,7 @@
                         </VBox>
                         <Label text="ENTRADAS" styleClass="etiqueta-campo"/>
                         <VBox fx:id="lineasEntradas" styleClass="panel" spacing="6"/>
-                        <Label fx:id="tituloConfiteria" text="CONFITERÃA" styleClass="etiqueta-campo"/>
+                        <Label fx:id="tituloConfiteria" text="CONFITERÍA" styleClass="etiqueta-campo"/>
                         <VBox fx:id="lineasConfiteria" styleClass="panel" spacing="6"/>
                         <Label text="PROMOCIONES" styleClass="etiqueta-campo"/>
                         <VBox fx:id="listaPromociones" styleClass="panel" spacing="8"/>
@@ -68,7 +68,7 @@
                         <Label fx:id="lblSaldo" styleClass="precio"/>
                     </HBox>
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="Saldo despuÃ©s del pago" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label text="Saldo después del pago" styleClass="texto-suave" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
                         <Label fx:id="lblSaldoFinal" styleClass="precio"/>
                     </HBox>
                     <Label fx:id="lblError" styleClass="error-texto" wrapText="true"/>
