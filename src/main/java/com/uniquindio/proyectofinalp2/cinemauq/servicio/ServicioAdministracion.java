@@ -78,16 +78,25 @@ public class ServicioAdministracion {
     // ---------------------------------------------------------------- Películas
 
     public Pelicula crearPelicula(Usuario actor, String titulo, int duracionMinutos) {
+        return crearPelicula(actor, titulo, duracionMinutos, null);
+    }
+
+    public Pelicula crearPelicula(Usuario actor, String titulo, int duracionMinutos, String posterUrl) {
         exigirAdministrador(actor, "crear una película");
         if (existeTitulo(titulo, null)) {
             throw new EstadoInvalidoException("Ya existe una película con ese título");
         }
         Pelicula pelicula = new Pelicula("P" + (++consecutivoPelicula), titulo, duracionMinutos);
+        pelicula.setPosterUrl(posterUrl);
         peliculas.add(pelicula);
         return pelicula;
     }
 
     public void editarPelicula(Usuario actor, Pelicula pelicula, String titulo, int duracionMinutos) {
+        editarPelicula(actor, pelicula, titulo, duracionMinutos, pelicula.getPosterUrl());
+    }
+
+    public void editarPelicula(Usuario actor, Pelicula pelicula, String titulo, int duracionMinutos, String posterUrl) {
         exigirAdministrador(actor, "editar una película");
         exigirExiste(peliculas.contains(pelicula), "La película no pertenece al cine");
         if (existeTitulo(titulo, pelicula)) {
@@ -95,6 +104,7 @@ public class ServicioAdministracion {
         }
         pelicula.setTitulo(titulo);
         pelicula.setDuracionMinutos(duracionMinutos);
+        pelicula.setPosterUrl(posterUrl);
     }
 
     public void eliminarPelicula(Usuario actor, Pelicula pelicula) {

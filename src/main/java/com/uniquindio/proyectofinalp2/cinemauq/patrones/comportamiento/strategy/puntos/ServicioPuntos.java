@@ -22,7 +22,7 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.C
 /*
  Context del Strategy.
  Confirma una compra ya pagada y acumula los puntos delegando el cálculo en la estrategia activa.
- No contiene ningún if/else sobre el tipo de política: agregar una política nueva
+ No contiene ningun if/else sobre el tipo de política: agregar una política nueva
  es crear una clase que implemente EstrategiaPuntos (OCP), sin tocar esta clase.
 
  También administra el canje: los lotes (PuntosAcumulados) nunca se modifican;
@@ -173,7 +173,7 @@ public class ServicioPuntos {
 
     /*
      Quita los puntos que otorgó una compra que fue reembolsada: si el dinero
-     volvió, los puntos ganados con ese dinero también. Se quita lo que AÚN no se gastó;
+     volvió, los puntos ganados con ese dinero también. Se quita lo que AuN no se gastó;
      lo que ya se canjeó queda canjeado (regla del grupo). Devuelve cuántos puntos se
      quitaron (0 si no quedaba nada). Llamarlo dos veces es inofensivo.
     */

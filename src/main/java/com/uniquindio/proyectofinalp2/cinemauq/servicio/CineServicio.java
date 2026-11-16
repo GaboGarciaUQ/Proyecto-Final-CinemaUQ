@@ -476,15 +476,18 @@ public class CineServicio {
         Pelicula interestelar = new Pelicula("P1", "Interestelar", 169);
         Pelicula avatar = new Pelicula("P2", "Avatar: El camino del agua", 192);
         Pelicula dune = new Pelicula("P3", "Dune: Parte dos", 166);
-        Pelicula horizons = new Pelicula("P4", "Beyond Horizons", 128);
-        Pelicula echoes = new Pelicula("P5", "Echoes", 104);
-        Pelicula future = new Pelicula("P6", "Future We Build", 117);
+        Pelicula clayface = new Pelicula("P4", "Clayface", 100);
+        Pelicula doomsday = new Pelicula("P5", "Avengers: Doomsday", 150);
         peliculas.add(interestelar);
         peliculas.add(avatar);
         peliculas.add(dune);
-        peliculas.add(horizons);
-        peliculas.add(echoes);
-        peliculas.add(future);
+        peliculas.add(clayface);
+        peliculas.add(doomsday);
+        interestelar.setPosterUrl("https://image.tmdb.org/t/p/original/qDSDtonrb6LfVOJXBbpZJNLjr2L.jpg");
+        avatar.setPosterUrl("https://image.tmdb.org/t/p/original/vc9OVrE1xsl1jyTvhfaGb4nAgvH.jpg");
+        dune.setPosterUrl("https://image.tmdb.org/t/p/original/ehO9fGqjgNCxF1HYTUUy70tIBk0.jpg");
+        clayface.setPosterUrl("https://image.tmdb.org/t/p/original/iOEgit3wQbqigNYl2M3vd9TA6kb.jpg");
+        doomsday.setPosterUrl("https://image.tmdb.org/t/p/original/czwC0Eq98CXZOicPzzq4iXaX494.jpg");
 
         agregarFuncion("F1", interestelar, sala1, 1, 19, 0, 15000);
         agregarFuncion("F2", interestelar, sala2, 1, 21, 30, 15000);
@@ -493,11 +496,11 @@ public class CineServicio {
         agregarFuncion("F5", avatar, sala3, 2, 20, 0, 16000);
         agregarFuncion("F6", dune, sala1, 1, 14, 30, 14000);
         agregarFuncion("F7", dune, sala3, 3, 19, 30, 16000);
-        agregarFuncion("F8", horizons, sala1, 2, 18, 15, 14000);
-        agregarFuncion("F9", horizons, sala2, 3, 20, 45, 15000);
-        agregarFuncion("F10", echoes, sala1, 1, 17, 0, 13000);
-        agregarFuncion("F11", future, sala2, 2, 19, 0, 15000);
-        agregarFuncion("F12", future, sala3, 4, 21, 0, 16000);
+        agregarFuncion("F8", clayface, sala1, 2, 18, 15, 14000);
+        agregarFuncion("F9", clayface, sala2, 3, 20, 45, 15000);
+        agregarFuncion("F10", doomsday, sala2, 1, 17, 0, 15000);
+        agregarFuncion("F11", doomsday, sala3, 2, 19, 0, 16000);
+        agregarFuncion("F12", doomsday, sala1, 4, 21, 0, 14000);
 
         ocuparAsientosDeEjemplo();
 

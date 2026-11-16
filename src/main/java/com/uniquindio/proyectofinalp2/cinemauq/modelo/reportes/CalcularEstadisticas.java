@@ -616,7 +616,7 @@ public class CalcularEstadisticas {
             this.ingresos = Collections.unmodifiableMap(new LinkedHashMap<>(ingresos));
         }
 
-        // Ordenado de mayor a menor número de entradas.
+        // Ordenado de mayor a menor numero de entradas.
         public Map<String, Integer> getEntradasPorPelicula() {
             return entradas;
         }

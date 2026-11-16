@@ -13,7 +13,7 @@ import java.util.Objects;
 
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.reportes.CalcularEstadisticas;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorReporte;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorExportador;
 import com.uniquindio.proyectofinalp2.cinemauq.util.Formato;
 
 /*
@@ -43,7 +43,7 @@ public class ServicioReportes {
     }
 
     /* Genera un reporte con los datos de este momento. desde y hasta solo se usan en los reportes por periodo. */
-    public Path generar(TipoReporte tipo, GeneradorReporte generador,
+    public Path generar(TipoReporte tipo, CreadorExportador generador,
                         LocalDate desde, LocalDate hasta, Path carpeta) throws IOException {
         Objects.requireNonNull(tipo, "El tipo de reporte es obligatorio");
         Objects.requireNonNull(generador, "El generador es obligatorio");
@@ -70,7 +70,7 @@ public class ServicioReportes {
     }
 
     /* Genera los 7 reportes en el mismo formato. */
-    public List<Path> generarTodos(GeneradorReporte generador, LocalDate desde, LocalDate hasta,
+    public List<Path> generarTodos(CreadorExportador generador, LocalDate desde, LocalDate hasta,
                                    Path carpeta) throws IOException {
         List<Path> archivos = new ArrayList<>();
         for (TipoReporte tipo : TipoReporte.values()) {
@@ -79,7 +79,7 @@ public class ServicioReportes {
         return archivos;
     }
 
-    private Path ventas(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path ventas(CalcularEstadisticas est, CreadorExportador generador,
                         LocalDate desde, LocalDate hasta, Path carpeta) throws IOException {
         CalcularEstadisticas.VentasPeriodo v = est.ventasPorPeriodo(desde, hasta);
         List<String> filas = new ArrayList<>();
@@ -98,7 +98,7 @@ public class ServicioReportes {
      Reporte del ejemplo del enunciado: una fila por película con sus entradas y lo cobrado,
      más "Total entradas" y "Total ventas". Respeta el rango de fechas.
     */
-    private Path entradas(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path entradas(CalcularEstadisticas est, CreadorExportador generador,
                           LocalDate desde, LocalDate hasta, Path carpeta) throws IOException {
         CalcularEstadisticas.VentasPorPelicula r = est.ventasPorPelicula(desde, hasta);
         List<String> filas = new ArrayList<>();
@@ -112,7 +112,7 @@ public class ServicioReportes {
                 r.getTotalVentas(), carpeta);
     }
 
-    private Path ocupacion(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path ocupacion(CalcularEstadisticas est, CreadorExportador generador,
                            Path carpeta) throws IOException {
         CalcularEstadisticas.OcupacionSalas oc = est.ocupacionSalas();
         List<String> filas = new ArrayList<>();
@@ -133,7 +133,7 @@ public class ServicioReportes {
         return generador.generar("Ocupacion de salas", corte(), filas, global, carpeta);
     }
 
-    private Path productos(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path productos(CalcularEstadisticas est, CreadorExportador generador,
                            Path carpeta) throws IOException {
         CalcularEstadisticas.ProductosVendidos p = est.productosVendidos();
         List<String> filas = new ArrayList<>();
@@ -151,7 +151,7 @@ public class ServicioReportes {
         return generador.generar("Productos y combos vendidos", corte(), filas, p.getValorTotal(), carpeta);
     }
 
-    private Path recargas(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path recargas(CalcularEstadisticas est, CreadorExportador generador,
                           LocalDate desde, LocalDate hasta, Path carpeta) throws IOException {
         CalcularEstadisticas.Recargas r = est.recargas(desde, hasta);
         List<String> filas = new ArrayList<>();
@@ -164,7 +164,7 @@ public class ServicioReportes {
         return generador.generar("Recargas de tarjetas", periodo(desde, hasta), filas, r.getTotal(), carpeta);
     }
 
-    private Path cancelaciones(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path cancelaciones(CalcularEstadisticas est, CreadorExportador generador,
                                Path carpeta) throws IOException {
         CalcularEstadisticas.Cancelaciones c = est.cancelacionesYReembolsos();
         List<String> filas = new ArrayList<>();
@@ -181,7 +181,7 @@ public class ServicioReportes {
         return generador.generar("Cancelaciones y reembolsos", corte(), filas, c.getTotalReembolsado(), carpeta);
     }
 
-    private Path puntos(CalcularEstadisticas est, GeneradorReporte generador,
+    private Path puntos(CalcularEstadisticas est, CreadorExportador generador,
                         Path carpeta) throws IOException {
         CalcularEstadisticas.ResumenPuntos p = est.puntos();
         List<String> filas = new ArrayList<>();

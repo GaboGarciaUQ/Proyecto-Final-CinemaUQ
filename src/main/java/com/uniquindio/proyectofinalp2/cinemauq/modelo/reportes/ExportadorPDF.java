@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReportePdf extends ReporteBase {
+public class ExportadorPDF extends ReporteBase {
 
     private static final int LINEAS_POR_PAGINA = 45;
 
-    public ReportePdf(String titulo, LocalDateTime generado, String periodo,
+    public ExportadorPDF(String titulo, LocalDateTime generado, String periodo,
                       List<String> filas, double total) {
         super(titulo, generado, periodo, filas, total);
     }

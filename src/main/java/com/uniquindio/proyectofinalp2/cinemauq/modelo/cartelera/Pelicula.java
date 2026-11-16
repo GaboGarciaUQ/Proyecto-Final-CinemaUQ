@@ -5,6 +5,7 @@ public class Pelicula {
     private final String id;
     private String titulo;
     private int duracionMinutos;
+    private String posterUrl;
 
     public Pelicula(String id, String titulo, int duracionMinutos) {
         if (id == null || id.isBlank()) {
@@ -26,6 +27,15 @@ public class Pelicula {
 
     public int getDuracionMinutos() {
         return duracionMinutos;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    // URL del póster; vacío significa "sin póster".
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl == null || posterUrl.isBlank() ? null : posterUrl.trim();
     }
 
     public void setTitulo(String titulo) {

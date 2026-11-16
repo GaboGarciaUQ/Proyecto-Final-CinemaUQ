@@ -30,9 +30,9 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.Ent
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.EntradaGeneralFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorCsv;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorHtml;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorPdf;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorReporte;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorTxt;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorPDF;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorExportador;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorTXT;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConsecutivoFactura;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
@@ -117,8 +117,8 @@ public class Main {
         List<String> detalleReporte = new ArrayList<>();
         detalleReporte.add("Interestelar - 3 entradas - $45000");
         detalleReporte.add("Avatar - 2 entradas - $30000");
-        GeneradorReporte[] generadores = {new GeneradorTxt(), new GeneradorCsv(), new GeneradorPdf(), new GeneradorHtml()};
-        for (GeneradorReporte g : generadores) {
+        CreadorExportador[] generadores = {new CreadorTXT(), new GeneradorCsv(), new CreadorPDF(), new GeneradorHtml()};
+        for (CreadorExportador g : generadores) {
             try {
                 Path archivo = g.generar("Ventas por periodo", "01/10/2026 - 14/10/2026",
                         detalleReporte, 75000, Paths.get("reportes"));

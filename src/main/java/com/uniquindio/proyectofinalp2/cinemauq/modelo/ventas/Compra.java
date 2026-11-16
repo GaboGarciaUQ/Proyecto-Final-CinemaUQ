@@ -97,7 +97,7 @@ public class Compra {
     }
 
     /*
-     Cancela la compra según la política recibida (Strategy) y devuelve el
+     Cancela la compra segun la política recibida (Strategy) y devuelve el
      monto a reembolsar. Solo calcula: quien mueve el dinero a la tarjeta
      es el servicio, no la compra.
     */
@@ -105,7 +105,7 @@ public class Compra {
         return estado.cancelar(this, politica, ahora);
     }
 
-    // ---- Métodos que invocan los estados (están en otro paquete, por eso son públicos) ----
+    // ---- Métodos que invocan los estados (están en otro paquete, por eso son publicos) ----
 
     public void cambiarEstado(EstadoDeCompra nuevoEstado) {
         this.estado = Objects.requireNonNull(nuevoEstado, "El estado es obligatorio");

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public abstract class ReporteBase implements Reporte {
+public abstract class ReporteBase implements ExportadorReporte {
 
     protected static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -26,7 +26,7 @@ public abstract class ReporteBase implements Reporte {
         return String.format(LOCAL, "%,.2f", total);
     }
 
-    // Para CSV: número sin separador de miles y con punto decimal, listo para una hoja de cálculo.
+    // Para CSV: numero sin separador de miles y con punto decimal, listo para una hoja de cálculo.
     protected String textoTotalPlano() {
         if (total == Math.rint(total)) {
             return String.format(Locale.ROOT, "%.0f", total);

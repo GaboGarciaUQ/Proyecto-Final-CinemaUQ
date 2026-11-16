@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.AdminFuncionesController" fitToWidth="true" hbarPolicy="NEVER">
+    <VBox spacing="16" style="-fx-padding: 24 32 32 32;">
+        <Label text="Funciones" styleClass="titulo"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <ComboBox fx:id="cmbPelicula" promptText="Película" prefWidth="220"/>
+            <ComboBox fx:id="cmbSala" promptText="Sala" prefWidth="180"/>
+            <DatePicker fx:id="dpFecha" promptText="Fecha" prefWidth="140"/>
+            <TextField fx:id="txtHora" promptText="HH:mm" prefWidth="80"/>
+            <TextField fx:id="txtPrecio" promptText="Precio base" prefWidth="110"/>
+        </HBox>
+        <HBox spacing="10">
+            <Button text="Programar" styleClass="boton-primario" onAction="#programar"/>
+            <Button text="Reprogramar" styleClass="boton-secundario" onAction="#reprogramar"/>
+            <Button text="Cancelar función" styleClass="boton-secundario" onAction="#cancelarFuncion"/>
+            <Button text="Eliminar" styleClass="boton-secundario" onAction="#eliminarFuncion"/>
+        </HBox>
+        <TableView fx:id="tblFunciones" prefHeight="280"/>
+
+        <Label text="Salas" styleClass="titulo" style="-fx-padding: 12 0 0 0;"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="txtNombreSala" promptText="Nombre de la sala" prefWidth="220"/>
+            <ComboBox fx:id="cmbTipoSala" promptText="Formato" prefWidth="140"/>
+            <Button text="Crear sala" styleClass="boton-primario" onAction="#crearSala"/>
+            <Button text="Eliminar sala" styleClass="boton-secundario" onAction="#eliminarSala"/>
+        </HBox>
+        <TableView fx:id="tblSalas" prefHeight="200"/>
+
+        <Label text="Asientos de la sala seleccionada" styleClass="etiqueta-campo"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="txtFila" promptText="Fila (ej. H)" prefWidth="110"/>
+            <TextField fx:id="txtNumero" promptText="Número" prefWidth="100"/>
+            <ComboBox fx:id="cmbTipoAsiento" prefWidth="140"/>
+            <Button text="Aplicar tipo" styleClass="boton-primario" onAction="#aplicarTipoAsiento"/>
+        </HBox>
+        <Label fx:id="lblAccesibles" styleClass="texto-suave" wrapText="true"/>
+    </VBox>
+</ScrollPane>

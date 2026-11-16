@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.AdminReportesController" fitToWidth="true" hbarPolicy="NEVER">
+    <VBox spacing="16" style="-fx-padding: 24 32 32 32;">
+        <Label text="Reportes y estadísticas" styleClass="titulo"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <DatePicker fx:id="dpDesde" prefWidth="150"/>
+            <DatePicker fx:id="dpHasta" prefWidth="150"/>
+            <Button text="Actualizar" styleClass="boton-secundario" onAction="#actualizar"/>
+            <ComboBox fx:id="cmbTipo" prefWidth="260"/>
+            <ComboBox fx:id="cmbFormato" prefWidth="90"/>
+            <Button text="Generar reporte" styleClass="boton-primario" onAction="#generar"/>
+        </HBox>
+        <Label fx:id="lblResultado" styleClass="exito-texto" wrapText="true"/>
+
+        <HBox spacing="16">
+            <VBox styleClass="panel" spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Ventas del periodo" styleClass="etiqueta-campo"/>
+                <Label fx:id="lblVentas" styleClass="precio"/>
+            </VBox>
+            <VBox styleClass="panel" spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Entradas vendidas" styleClass="etiqueta-campo"/>
+                <Label fx:id="lblEntradas" styleClass="precio"/>
+            </VBox>
+            <VBox styleClass="panel" spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Película líder" styleClass="etiqueta-campo"/>
+                <Label fx:id="lblLider" styleClass="precio"/>
+            </VBox>
+            <VBox styleClass="panel" spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Reembolsado" styleClass="etiqueta-campo"/>
+                <Label fx:id="lblReembolsos" styleClass="precio"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="16">
+            <BarChart fx:id="grafEntradas" title="Entradas por película" legendVisible="false" prefHeight="300" HBox.hgrow="ALWAYS">
+                <xAxis><CategoryAxis/></xAxis>
+                <yAxis><NumberAxis/></yAxis>
+            </BarChart>
+            <PieChart fx:id="grafOcupacion" title="Ocupación por formato de sala (%)" prefHeight="300" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="16">
+            <LineChart fx:id="grafVentas" title="Ventas por día" legendVisible="false" prefHeight="300" HBox.hgrow="ALWAYS">
+                <xAxis><CategoryAxis/></xAxis>
+                <yAxis><NumberAxis/></yAxis>
+            </LineChart>
+            <BarChart fx:id="grafProductos" title="Productos y combos más vendidos" legendVisible="false" prefHeight="300" HBox.hgrow="ALWAYS">
+                <xAxis><CategoryAxis/></xAxis>
+                <yAxis><NumberAxis/></yAxis>
+            </BarChart>
+        </HBox>
+    </VBox>
+</ScrollPane>
