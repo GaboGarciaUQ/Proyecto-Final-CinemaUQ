@@ -3,6 +3,7 @@ package com.uniquindio.proyectofinalp2.cinemauq.controlador;
 import java.util.Optional;
 
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CinemaException;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Administrador;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Usuario;
 import com.uniquindio.proyectofinalp2.cinemauq.servicio.CineServicio;
@@ -53,7 +54,7 @@ public class LoginController {
                 ? "Tu tarjeta virtual se crea con la cuenta."
                 : "Usa el correo con el que te registraste.");
         btnAccion.setText(modoRegistro ? "Crear cuenta" : "Ingresar");
-        lblCambio.setText(modoRegistro ? "¿Ya tienes cuenta?" : "¿Aún no tienes cuenta?");
+        lblCambio.setText(modoRegistro ? "¿Ya tienes cuenta?" : "¿Aun no tienes cuenta?");
         btnCambiar.setText(modoRegistro ? "Ingresar" : "Crear cuenta");
     }
 
@@ -69,7 +70,8 @@ public class LoginController {
             return;
         }
         if (usuario.get().esAdministrador()) {
-            mostrarError("El panel de administrador llega en la siguiente etapa");
+            sesion.iniciarAdmin((Administrador) usuario.get());
+            Navegador.ir(Vista.ADMIN);
             return;
         }
         entrar((Cliente) usuario.get());

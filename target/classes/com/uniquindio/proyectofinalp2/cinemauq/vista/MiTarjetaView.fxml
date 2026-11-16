@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.uniquindio.proyectofinalp2.cinemauq.controlador.MiTarjetaController">
+    <top>
+        <fx:include source="BarraSuperiorView.fxml"/>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+            <VBox spacing="22" style="-fx-padding: 28 40 40 40;">
+                <VBox spacing="4">
+                    <Label text="Mi tarjeta" styleClass="titulo"/>
+                    <Label fx:id="lblEstado" styleClass="subtitulo"/>
+                </VBox>
+                <HBox spacing="24">
+                    <VBox styleClass="panel" spacing="10" prefWidth="320" minWidth="320">
+                        <Label text="Saldo disponible" styleClass="etiqueta-campo"/>
+                        <Label fx:id="lblSaldo" styleClass="total"/>
+                        <Label text="Solicitar recarga" styleClass="etiqueta-campo"/>
+                        <TextField fx:id="txtMonto" promptText="Monto (ej. 50000)" onAction="#solicitar"/>
+                        <Button text="Solicitar recarga" styleClass="boton-primario" maxWidth="Infinity" onAction="#solicitar"/>
+                        <Label fx:id="lblMensaje" styleClass="texto-suave" wrapText="true"/>
+                    </VBox>
+                    <VBox styleClass="panel" spacing="10" HBox.hgrow="ALWAYS">
+                        <Label text="Movimientos" styleClass="titulo-seccion"/>
+                        <TableView fx:id="tblMovimientos" prefHeight="260"/>
+                    </VBox>
+                </HBox>
+                <HBox spacing="24">
+                    <VBox styleClass="panel" spacing="10" HBox.hgrow="ALWAYS">
+                        <Label text="Mis solicitudes de recarga" styleClass="titulo-seccion"/>
+                        <TableView fx:id="tblSolicitudes" prefHeight="190"/>
+                    </VBox>
+                    <VBox styleClass="panel" spacing="10" HBox.hgrow="ALWAYS">
+                        <Label text="Notificaciones" styleClass="titulo-seccion"/>
+                        <ListView fx:id="lstNotificaciones" prefHeight="190"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

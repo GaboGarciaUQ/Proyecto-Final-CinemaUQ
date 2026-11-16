@@ -13,6 +13,7 @@ public final class Navegador {
 
     private static final String RUTA_VISTAS = "/com/uniquindio/proyectofinalp2/cinemauq/vista/";
     private static final String RUTA_CSS = "/com/uniquindio/proyectofinalp2/cinemauq/css/cinemauq.css";
+    private static final String RUTA_CSS_COMPONENTES = "/com/uniquindio/proyectofinalp2/cinemauq/css/componentes.css";
 
     private static Stage stage;
     private static Scene scene;
@@ -50,5 +51,6 @@ public final class Navegador {
             throw new IllegalStateException("No se encontró la hoja de estilos en " + RUTA_CSS);
         }
         escena.getStylesheets().add(css.toExternalForm());
+        escena.getStylesheets().add(Navegador.class.getResource(RUTA_CSS_COMPONENTES).toExternalForm());
     }
 }

@@ -1,9 +1,8 @@
 package com.uniquindio.proyectofinalp2.cinemauq.controlador;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.AsientoNoDisponibleException;
@@ -11,11 +10,13 @@ import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CinemaException;
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.SaldoInsuficienteException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Asiento;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Comprable;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.pagos.Tarjeta;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Compra;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.Promocion;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.ventas.TipoBeneficio;
 import com.uniquindio.proyectofinalp2.cinemauq.servicio.CineServicio;
 import com.uniquindio.proyectofinalp2.cinemauq.util.Formato;
 import com.uniquindio.proyectofinalp2.cinemauq.util.Navegador;
@@ -49,6 +50,8 @@ public class CompraController {
     @FXML private Label lblIva;
     @FXML private Label lblTotal;
     @FXML private Label lblPuntos;
+    @FXML private Label lblPuntosDisponibles;
+    @FXML private Label lblPuntosCanje;
     @FXML private Label lblSaldo;
     @FXML private Label lblSaldoFinal;
     @FXML private Label lblError;
@@ -68,6 +71,10 @@ public class CompraController {
     private final List<Asiento> asientos = sesion.getAsientos();
     private final List<Comprable> confiteria = sesion.getConfiteria();
     private final List<Promocion> aplicadas = new ArrayList<>();
+    // Lo que el cliente decidió pagar con puntos.
+    private final List<Asiento> asientosCanjeados = new ArrayList<>();
+    private final List<Comprable> confiteriaCanjeada = new ArrayList<>();
+    private final List<CheckBox> opcionesCanje = new ArrayList<>();
     private double subtotal;
 
     @FXML
@@ -80,7 +87,9 @@ public class CompraController {
             double precio = servicio.precioEntrada(funcion, a);
             subtotal += precio;
             String tipo = a.esAccesible() ? "Entrada " + etiqueta(a) + " (accesible)" : "Entrada " + etiqueta(a);
-            lineasEntradas.getChildren().add(linea(tipo, precio));
+            CheckBox canjear = opcionCanje(servicio.getConfig().getPuntosPara(TipoBeneficio.ENTRADA),
+                    marcado -> alternar(asientosCanjeados, a, marcado));
+            lineasEntradas.getChildren().add(linea(tipo, precio, canjear));
         }
         cargarConfiteria();
         cargarPromociones();
@@ -88,19 +97,39 @@ public class CompraController {
     }
 
     private void cargarConfiteria() {
-        Map<Comprable, Integer> cantidades = new LinkedHashMap<>();
-        for (Comprable c : confiteria) {
-            cantidades.merge(c, 1, Integer::sum);
-        }
-        boolean hay = !cantidades.isEmpty();
+        boolean hay = !confiteria.isEmpty();
         tituloConfiteria.setVisible(hay);
         tituloConfiteria.setManaged(hay);
         lineasConfiteria.setVisible(hay);
         lineasConfiteria.setManaged(hay);
-        for (Map.Entry<Comprable, Integer> e : cantidades.entrySet()) {
-            double valor = e.getKey().getPrecio() * e.getValue();
-            subtotal += valor;
-            lineasConfiteria.getChildren().add(linea(e.getValue() + " × " + e.getKey().getNombre(), valor));
+        // Una fila por unidad, para poder canjear solo algunas con puntos.
+        for (Comprable item : confiteria) {
+            subtotal += item.getPrecio();
+            TipoBeneficio tipo = item instanceof Combo ? TipoBeneficio.COMBO : TipoBeneficio.PRODUCTO;
+            CheckBox canjear = opcionCanje(servicio.getConfig().getPuntosPara(tipo),
+                    marcado -> alternar(confiteriaCanjeada, item, marcado));
+            lineasConfiteria.getChildren().add(linea("1 × " + item.getNombre(), item.getPrecio(), canjear));
+        }
+    }
+
+    // Casilla "Canjear (N pts)": agrega o quita el beneficio de la lista de canje y recalcula.
+    private CheckBox opcionCanje(int puntos, Consumer<Boolean> accion) {
+        CheckBox opcion = new CheckBox("Canjear (" + puntos + " pts)");
+        opcion.getStyleClass().add("check-cine");
+        opcion.setUserData(puntos);
+        opcion.setOnAction(e -> {
+            accion.accept(opcion.isSelected());
+            recalcular();
+        });
+        opcionesCanje.add(opcion);
+        return opcion;
+    }
+
+    private <T> void alternar(List<T> lista, T elemento, boolean marcado) {
+        if (marcado) {
+            lista.add(elemento);
+        } else {
+            lista.remove(elemento);
         }
     }
 
@@ -127,19 +156,22 @@ public class CompraController {
         }
     }
 
-    private HBox linea(String texto, double valor) {
+    private HBox linea(String texto, double valor, CheckBox canjear) {
         Label nombre = new Label(texto);
         nombre.setWrapText(true);
         nombre.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(nombre, Priority.ALWAYS);
         Label precio = new Label(Formato.dinero(valor));
         precio.getStyleClass().add("texto-suave");
-        return new HBox(8, nombre, precio);
+        HBox fila = new HBox(8, nombre, canjear, precio);
+        fila.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        return fila;
     }
 
     private void recalcular() {
         lblError.setText("");
-        Compra simulada = servicio.simularCompra(cliente, funcion, asientos, confiteria, aplicadas);
+        Compra simulada = servicio.simularCompra(cliente, funcion, asientos, confiteria, aplicadas,
+                asientosCanjeados, confiteriaCanjeada);
         double total = simulada.getTotal();
         double iva = servicio.getConfig().getIva();
         double baseConDescuento = total / (1 + iva);
@@ -152,6 +184,18 @@ public class CompraController {
         lblTotal.setText(Formato.dinero(total));
         lblPuntos.setText("Ganarás " + servicio.puntosPorCompra(total) + " pts con esta compra");
 
+        int vigentes = servicio.getPuntosVigentes(cliente);
+        int gastados = simulada.getPuntosRedimidos();
+        lblPuntosDisponibles.setText(vigentes + " pts");
+        lblPuntosCanje.setText(gastados > 0
+                ? "Canjearás " + gastados + " pts (te quedarán " + (vigentes - gastados) + ")"
+                : "Marca «Canjear» en lo que quieras pagar con tus puntos");
+        // No dejar marcar más canjes de los que alcanzan los puntos vigentes.
+        for (CheckBox opcion : opcionesCanje) {
+            int costo = (Integer) opcion.getUserData();
+            opcion.setDisable(!opcion.isSelected() && gastados + costo > vigentes);
+        }
+
         Tarjeta tarjeta = servicio.getTarjeta(cliente);
         double saldo = tarjeta.getSaldo();
         lblSaldo.setText(Formato.dinero(saldo));
@@ -159,6 +203,8 @@ public class CompraController {
 
         if (!tarjeta.isActiva()) {
             bloquearPago("Tu tarjeta está inactiva. Contacta al administrador");
+        } else if (gastados > vigentes) {
+            bloquearPago("Puntos insuficientes: tienes " + vigentes + " vigentes y necesitas " + gastados);
         } else if (saldo < total) {
             bloquearPago("Saldo insuficiente. Pide una recarga al administrador");
         } else {
@@ -174,7 +220,8 @@ public class CompraController {
     @FXML
     private void pagar() {
         try {
-            Compra compra = servicio.comprar(cliente, funcion, asientos, confiteria, aplicadas);
+            Compra compra = servicio.comprar(cliente, funcion, asientos, confiteria, aplicadas,
+                    asientosCanjeados, confiteriaCanjeada);
             mostrarConfirmacion(compra);
         } catch (SaldoInsuficienteException e) {
             bloquearPago("Te faltan " + Formato.dinero(e.getFaltante()) + ". Pide una recarga al administrador");
@@ -191,7 +238,11 @@ public class CompraController {
         lblConfPelicula.setText(funcion.getPelicula().getTitulo() + " · " + Formato.fechaHora(funcion.getFechaHora()));
         lblConfAsientos.setText("Asientos: " + asientos.stream().map(this::etiqueta).collect(Collectors.joining(", ")));
         lblConfTotal.setText("Pagaste " + Formato.dinero(compra.getTotal()));
-        lblConfPuntos.setText("Ganaste " + servicio.puntosPorCompra(compra.getTotal()) + " pts");
+        String puntos = "Ganaste " + servicio.puntosPorCompra(compra.getTotal()) + " pts";
+        if (compra.getPuntosRedimidos() > 0) {
+            puntos = "Canjeaste " + compra.getPuntosRedimidos() + " pts · " + puntos;
+        }
+        lblConfPuntos.setText(puntos);
         lblConfSaldo.setText("Saldo restante: " + Formato.dinero(saldo));
         barraController.actualizarSaldo();
         mostrar(vistaPago, false);

@@ -17,6 +17,8 @@ import com.uniquindio.proyectofinalp2.cinemauq.util.Vista;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
@@ -57,6 +59,7 @@ public class CarteleraController {
         afiche.getStyleClass().addAll("afiche", "afiche-" + (indice % VARIANTES_AFICHE));
         afiche.setPadding(new Insets(16));
         afiche.setPrefHeight(200);
+        ponerPoster(afiche, tituloAfiche, pelicula.getPosterUrl());
 
         Label duracion = new Label(Formato.duracion(pelicula.getDuracionMinutos()));
         duracion.getStyleClass().add("texto-suave");
@@ -77,6 +80,33 @@ public class CarteleraController {
             tarjeta.getChildren().addAll(etiquetaDia, horarios);
         }
         return tarjeta;
+    }
+
+    // Si hay URL, muestra el póster; si falla la carga, se queda el afiche de color con el título.
+    private void ponerPoster(StackPane afiche, Label titulo, String url) {
+        if (url == null) {
+            return;
+        }
+        try {
+            Image imagen = new Image(url, 218, 320, true, true, true);
+            if (imagen.isError()) {
+                return;
+            }
+            ImageView vista = new ImageView(imagen);
+            vista.setPreserveRatio(true);
+            afiche.getChildren().setAll(vista);
+            afiche.setPadding(Insets.EMPTY);
+            afiche.setPrefHeight(320);
+            imagen.errorProperty().addListener((o, antes, error) -> {
+                if (error) {
+                    afiche.getChildren().setAll(titulo);
+                    afiche.setPadding(new Insets(16));
+                    afiche.setPrefHeight(200);
+                }
+            });
+        } catch (IllegalArgumentException e) {
+            // URL inválida: se deja el afiche por defecto.
+        }
     }
 
     private Map<LocalDate, List<Funcion>> agruparPorDia(List<Funcion> funciones) {

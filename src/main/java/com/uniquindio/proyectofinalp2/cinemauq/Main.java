@@ -30,9 +30,9 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.Ent
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.EntradaGeneralFactory;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorCsv;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorHtml;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorPdf;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorReporte;
-import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.GeneradorTxt;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorPDF;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorExportador;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.factory.CreadorTXT;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConsecutivoFactura;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.facade.CompraFacade;
@@ -117,8 +117,8 @@ public class Main {
         List<String> detalleReporte = new ArrayList<>();
         detalleReporte.add("Interestelar - 3 entradas - $45000");
         detalleReporte.add("Avatar - 2 entradas - $30000");
-        GeneradorReporte[] generadores = {new GeneradorTxt(), new GeneradorCsv(), new GeneradorPdf(), new GeneradorHtml()};
-        for (GeneradorReporte g : generadores) {
+        CreadorExportador[] generadores = {new CreadorTXT(), new GeneradorCsv(), new CreadorPDF(), new GeneradorHtml()};
+        for (CreadorExportador g : generadores) {
             try {
                 Path archivo = g.generar("Ventas por periodo", "01/10/2026 - 14/10/2026",
                         detalleReporte, 75000, Paths.get("reportes"));
@@ -151,9 +151,10 @@ public class Main {
                 .entrada(entradaAcc)
                 .combo(combo)
                 .promocion(promocion)
-                .puntosRedimidos(50)
+                .canjearEntrada(entrada2)
                 .build();
         System.out.println("Compra completa: $" + completa.getTotal() + " - " + completa.getEstado());
+        System.out.println("Puntos que costó el canje: " + completa.getPuntosRedimidos());
         completa.marcarPagada();
         System.out.println("Después de pagar: " + completa.getEstado());
         System.out.println("Puntos ganados: " + config.calcularPuntos(completa.getTotal()));
@@ -179,11 +180,12 @@ public class Main {
 
         try {
             new Compra.Builder(config).cliente(cliente).funcion(funcion).entrada(entrada1)
-                    .puntosRedimidos(100000).build();
+                    .canjearEntrada(entrada2).build();
         } catch (CinemaException e) {
-            System.out.println("Demasiados puntos: " + e.getMessage());
+            System.out.println("Canje de entrada ajena: " + e.getMessage());
         }
-                System.out.println("\n=== PROXY ===");
+
+        System.out.println("\n=== PROXY ===");
         Administrador admin = new Administrador("A1", "Carlos", "admin@cinemauq.com");
         Cliente intruso = new Cliente("2", "Luis", "luis@correo.com");
         TarjetaVirtual tarjetaReal = new TarjetaVirtual("T1", cliente);
@@ -227,7 +229,8 @@ public class Main {
         } catch (CinemaException e) {
             System.out.println("Pago sin saldo: " + e.getMessage());
         }
-                System.out.println("\n=== FACADE ===");
+
+        System.out.println("\n=== FACADE ===");
         CompraFacade fachada = new CompraFacade(config);
         Funcion funcionFachada = new Funcion("F3", peliculaInterstellar, sala3D,
                 LocalDateTime.now().plusDays(4), 15000);
@@ -235,7 +238,7 @@ public class Main {
 
         List<Asiento> elegidos = List.of(buscar(sala3D, 'B', 1), buscar(sala3D, 'B', 2));
         Compra compraFachada = fachada.comprar(tarjetaCliente, funcionFachada, elegidos,
-                combo, List.of(promocion), 0);
+                combo, List.of(promocion));
         System.out.println("Compra: $" + compraFachada.getTotal() + " - " + compraFachada.getEstado());
         System.out.println("Detalle: " + compraFachada.getDescripcionCobro());
         System.out.println("Saldo de la tarjeta: $" + tarjetaCliente.getSaldo());
@@ -243,12 +246,12 @@ public class Main {
 
         List<Asiento> otros = List.of(buscar(sala3D, 'C', 1), buscar(sala3D, 'C', 2));
         try {
-            fachada.comprar(tarjetaCliente, funcionFachada, otros, null, List.of(), 0);
+            fachada.comprar(tarjetaCliente, funcionFachada, otros, null, List.of());
         } catch (CinemaException e) {
             System.out.println("Compra sin saldo: " + e.getMessage());
         }
         try {
-            fachada.comprar(tarjetaIntruso, funcionFachada, otros, null, List.of(), 0);
+            fachada.comprar(tarjetaIntruso, funcionFachada, otros, null, List.of());
         } catch (CinemaException e) {
             System.out.println("Compra con tarjeta ajena: " + e.getMessage());
         }

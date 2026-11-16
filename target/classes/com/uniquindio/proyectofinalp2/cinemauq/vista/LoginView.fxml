@@ -45,7 +45,7 @@
                             onAction="#cambiarModo"/>
                 </HBox>
 
-                <Label text="Para probar: ana@correo.com (con saldo) o luis@correo.com (poco saldo)."
+                <Label text="Para probar: ana@correo.com (con saldo) o luis@correo.com (poco saldo). Admin: admin@cinemauq.com."
                        styleClass="texto-suave, texto-pequeno" wrapText="true"/>
             </VBox>
         </StackPane>

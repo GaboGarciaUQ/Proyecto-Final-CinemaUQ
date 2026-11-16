@@ -5,21 +5,16 @@ import java.util.Objects;
 public class Producto implements Comprable {
 
     private final String id;
-    private final String nombre;
-    private final double precio;
+    private String nombre;
+    private double precio;
 
     public Producto(String id, String nombre, double precio) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("El producto necesita un id");
         }
-        if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El producto necesita un nombre");
-        }
-        if (precio <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor a cero");
-        }
+        validar(nombre, precio);
         this.id = id;
-        this.nombre = nombre;
+        this.nombre = nombre.trim();
         this.precio = precio;
     }
 
@@ -35,6 +30,25 @@ public class Producto implements Comprable {
 
     public String getId() {
         return id;
+    }
+
+    public void setNombre(String nombre) {
+        validar(nombre, precio);
+        this.nombre = nombre.trim();
+    }
+
+    public void setPrecio(double precio) {
+        validar(nombre, precio);
+        this.precio = precio;
+    }
+
+    private static void validar(String nombre, double precio) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El producto necesita un nombre");
+        }
+        if (precio <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor a cero");
+        }
     }
 
     @Override

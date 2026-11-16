@@ -8,10 +8,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.uniquindio.proyectofinalp2.cinemauq.excepcion.CompraInvalidaException;
-import com.uniquindio.proyectofinalp2.cinemauq.excepcion.EstadoInvalidoException;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.cartelera.Funcion;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Combo;
+import com.uniquindio.proyectofinalp2.cinemauq.modelo.confiteria.Comprable;
 import com.uniquindio.proyectofinalp2.cinemauq.modelo.usuarios.Cliente;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.state.EstadoDeCompra;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.state.EstadoPendiente;
+import com.uniquindio.proyectofinalp2.cinemauq.patrones.comportamiento.strategy.reembolso.PoliticaReembolso;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.creacionales.singleton.ConfiguracionCine;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.Cobro;
 import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.CobroBase;
@@ -22,6 +25,9 @@ import com.uniquindio.proyectofinalp2.cinemauq.patrones.estructurales.decorator.
 /*
  Creacional: Builder (Compra solo se crea con Compra.Builder).
  Estructural: Decorator (el total se calcula con una cadena de Cobro).
+ Comportamiento: State (Compra es el Contexto; su ciclo de vida lo manejan
+ los objetos EstadoDeCompra). Los estados que reembolsan usan Strategy
+ (PoliticaReembolso) para decidir si se permite y cuánto se devuelve.
 */
 public class Compra {
 
@@ -32,12 +38,13 @@ public class Compra {
     private final List<Entrada> entradas;
     private final Combo combo;
     private final List<Promocion> promociones;
-    private final int puntosRedimidos;
+    private final List<Canje> canjes;
     private final double total;
     private final String descripcionCobro;
-    private EstadoCompra estado;
+    private EstadoDeCompra estado;
+    private double montoReembolsado;
 
-    private Compra(Builder b) {
+    private Compra(Builder b, List<Canje> canjes) {
         this.id = b.id;
         this.fecha = b.fecha;
         this.cliente = b.cliente;
@@ -45,18 +52,20 @@ public class Compra {
         this.entradas = new ArrayList<>(b.entradas);
         this.combo = b.combo;
         this.promociones = new ArrayList<>(b.promociones);
-        this.puntosRedimidos = b.puntosRedimidos;
+        this.canjes = new ArrayList<>(canjes);
 
-        Cobro cobro = armarCobro(entradas, combo, promociones, puntosRedimidos, b.config);
+        Cobro cobro = armarCobro(entradas, combo, promociones, this.canjes, b.config);
         this.total = cobro.getValor();
         this.descripcionCobro = cobro.getDescripcion();
 
-        this.estado = EstadoCompra.PENDIENTE;
+        this.estado = EstadoPendiente.INSTANCIA;
     }
 
-    // Cadena: subtotal -> promociones -> puntos -> IVA.
+    // Cadena: subtotal -> canje con puntos -> promociones -> IVA.
+    // El canje va antes que las promociones: lo canjeado sale gratis completo y las
+    // promociones se aplican solo sobre lo que realmente se paga.
     private static Cobro armarCobro(List<Entrada> entradas, Combo combo, List<Promocion> promociones,
-                                    int puntos, ConfiguracionCine config) {
+                                    List<Canje> canjes, ConfiguracionCine config) {
         double subtotal = 0;
         for (Entrada e : entradas) {
             subtotal += e.getPrecio();
@@ -66,21 +75,61 @@ public class Compra {
         }
 
         Cobro cobro = new CobroBase(subtotal);
+        if (!canjes.isEmpty()) {
+            double valorCanjeado = 0;
+            int puntos = 0;
+            for (Canje c : canjes) {
+                valorCanjeado += c.getValor();
+                puntos += c.getPuntos();
+            }
+            cobro = new DescuentoPuntos(cobro, puntos, valorCanjeado);
+        }
         for (Promocion p : promociones) {
             cobro = new DescuentoPromocion(cobro, p);
-        }
-        if (puntos > 0) {
-            cobro = new DescuentoPuntos(cobro, puntos, config.getValorPunto());
         }
         return new RecargoIva(cobro, config.getIva());
     }
 
+    // ---- Operaciones del ciclo de vida: se delegan en el estado actual (State) ----
+
     public void marcarPagada() {
-        if (estado != EstadoCompra.PENDIENTE) {
-            throw new EstadoInvalidoException(
-                    "Solo una compra pendiente puede pagarse (estado: " + estado + ")");
+        estado.pagar(this);
+    }
+
+    /*
+     Cancela la compra segun la política recibida (Strategy) y devuelve el
+     monto a reembolsar. Solo calcula: quien mueve el dinero a la tarjeta
+     es el servicio, no la compra.
+    */
+    public double cancelar(PoliticaReembolso politica, LocalDateTime ahora) {
+        return estado.cancelar(this, politica, ahora);
+    }
+
+    // ---- Métodos que invocan los estados (están en otro paquete, por eso son publicos) ----
+
+    public void cambiarEstado(EstadoDeCompra nuevoEstado) {
+        this.estado = Objects.requireNonNull(nuevoEstado, "El estado es obligatorio");
+    }
+
+    // Anula las entradas y devuelve los asientos a la función.
+    public void liberarEntradas() {
+        for (Entrada entrada : entradas) {
+            entrada.anular();
+            funcion.liberar(entrada.getAsiento());
         }
-        estado = EstadoCompra.PAGADA;
+    }
+
+    /*
+     Anota el monto devuelto. La tolerancia de 0.01 existe porque el total
+     (con IVA) puede tener más de dos decimales y el reembolso se redondea
+     a dos: un reembolso del 100 % podría superar el total por medio centavo.
+    */
+    public void registrarReembolso(double monto) {
+        if (monto < 0 || monto > total + 0.01) {
+            throw new CompraInvalidaException(
+                    "El reembolso no puede ser negativo ni superar el total pagado");
+        }
+        this.montoReembolsado = monto;
     }
 
     public String getId() {
@@ -111,8 +160,17 @@ public class Compra {
         return Collections.unmodifiableList(promociones);
     }
 
+    public List<Canje> getCanjes() {
+        return Collections.unmodifiableList(canjes);
+    }
+
+    // Puntos que costó todo lo canjeado en esta compra.
     public int getPuntosRedimidos() {
-        return puntosRedimidos;
+        int puntos = 0;
+        for (Canje c : canjes) {
+            puntos += c.getPuntos();
+        }
+        return puntos;
     }
 
     public double getTotal() {
@@ -123,8 +181,13 @@ public class Compra {
         return descripcionCobro;
     }
 
+    // Se sigue exponiendo el enum para que reportes, puntos e interfaz no cambien.
     public EstadoCompra getEstado() {
-        return estado;
+        return estado.getEstado();
+    }
+
+    public double getMontoReembolsado() {
+        return montoReembolsado;
     }
 
     public static class Builder {
@@ -141,7 +204,8 @@ public class Compra {
         // Opcionales
         private Combo combo;
         private final List<Promocion> promociones = new ArrayList<>();
-        private int puntosRedimidos = 0;
+        private final List<Entrada> entradasCanjeadas = new ArrayList<>();
+        private final List<Comprable> confiteriaCanjeada = new ArrayList<>();
 
         public Builder(ConfiguracionCine config) {
             this.config = Objects.requireNonNull(config, "La configuración es obligatoria");
@@ -178,8 +242,21 @@ public class Compra {
             return this;
         }
 
-        public Builder puntosRedimidos(int puntos) {
-            this.puntosRedimidos = puntos;
+        // Canjea con puntos una de las entradas de esta compra.
+        public Builder canjearEntrada(Entrada entrada) {
+            if (entrada == null) {
+                throw new IllegalArgumentException("La entrada a canjear no puede ser nula");
+            }
+            this.entradasCanjeadas.add(entrada);
+            return this;
+        }
+
+        // Canjea con puntos un producto o combo que forma parte de la confitería de esta compra.
+        public Builder canjearConfiteria(Comprable item) {
+            if (item == null) {
+                throw new IllegalArgumentException("El producto a canjear no puede ser nulo");
+            }
+            this.confiteriaCanjeada.add(item);
             return this;
         }
 
@@ -193,16 +270,42 @@ public class Compra {
             if (entradas.isEmpty()) {
                 throw new CompraInvalidaException("Debe elegir al menos un asiento (entrada)");
             }
-            if (puntosRedimidos < 0) {
-                throw new CompraInvalidaException("Los puntos redimidos no pueden ser negativos");
-            }
             for (Entrada e : entradas) {
                 if (e.getFuncion() != funcion) {
                     throw new CompraInvalidaException(
                             "Todas las entradas deben pertenecer a la función de la compra");
                 }
             }
-            return new Compra(this);
+            return new Compra(this, armarCanjes());
+        }
+
+        private List<Canje> armarCanjes() {
+            List<Canje> canjes = new ArrayList<>();
+            List<Entrada> yaCanjeadas = new ArrayList<>();
+            for (Entrada e : entradasCanjeadas) {
+                if (!entradas.contains(e)) {
+                    throw new CompraInvalidaException("Solo se pueden canjear entradas de esta compra");
+                }
+                if (yaCanjeadas.contains(e)) {
+                    throw new CompraInvalidaException("La misma entrada no se puede canjear dos veces");
+                }
+                yaCanjeadas.add(e);
+                canjes.add(new Canje(TipoBeneficio.ENTRADA,
+                        "Entrada " + e.getAsiento().getFila() + e.getAsiento().getNumero(),
+                        e.getPrecio(), config.getPuntosPara(TipoBeneficio.ENTRADA)));
+            }
+
+            List<Comprable> disponibles = combo == null
+                    ? new ArrayList<>() : new ArrayList<>(combo.getComponentes());
+            for (Comprable item : confiteriaCanjeada) {
+                if (!disponibles.remove(item)) {
+                    throw new CompraInvalidaException(
+                            "Solo se pueden canjear productos de la confitería de esta compra: " + item.getNombre());
+                }
+                TipoBeneficio tipo = item instanceof Combo ? TipoBeneficio.COMBO : TipoBeneficio.PRODUCTO;
+                canjes.add(new Canje(tipo, item.getNombre(), item.getPrecio(), config.getPuntosPara(tipo)));
+            }
+            return canjes;
         }
     }
 }
